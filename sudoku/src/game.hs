@@ -62,14 +62,14 @@ emptyBoard = replicate 9 $ replicate 9 Empty
 -- Print the board in a hunan readable format
 showBoard :: Board -> String
 showBoard b =
-  let printedRows = map (\row -> "|" ++ (show $ row !! 0) ++ "|" ++ (show $ row !! 1) ++ "|" ++ (show $ row !! 2) ++ "|" ++ (show $ row !! 3) ++ "|" ++ (show $ row !! 4) ++ "|" ++ (show $ row !! 5) ++ "|" ++ (show $ row !! 6) ++ "|" ++ (show $ row !! 7) ++ "|" ++ (show $ row !! 8) ++ "|") b in (intercalate "\n+-----+-----+-----+\n" printedRows) ++ "\n"
+  let rows = map (\row -> "|" ++ (show $ row !! 0) ++ "|" ++ (show $ row !! 1) ++ "|" ++ (show $ row !! 2) ++ "|" ++ (show $ row !! 3) ++ "|" ++ (show $ row !! 4) ++ "|" ++ (show $ row !! 5) ++ "|" ++ (show $ row !! 6) ++ "|" ++ (show $ row !! 7) ++ "|" ++ (show $ row !! 8) ++ "|") b in (intercalate "\n+-----+-----+-----+\n" rows) ++ "\n"
 
 main = do
   putStrLn $ take 10 $ repeat '\n'
   putStrLn "\nWelcome to Sudoku!\n"
   putStrLn "To enter a number, Use this format: <coordinate x> <coordinate y> <number> (e.g One).\n"
   putStrLn "To aks for help, Use this format: <help>."
-  putStrLn "The hint will be given is the same format used for entering a number.\n"
+  putStrLn "The hint will be given in the same format used for entering a number.\n"
   putStrLn "Type 'exit' at any time to quit.\n"
   putStrLn "Starting board (size: 9x9)"
   putStrLn $ showBoard emptyBoard
