@@ -33,26 +33,26 @@
   (major1) == 12 && (major2) == 0 && (minor) <= 0)
 #endif /* MIN_TOOL_VERSION_gcc */
 
-/* tool ghc-8.10.4 */
+/* tool ghc-8.10.3 */
 #ifndef TOOL_VERSION_ghc
-#define TOOL_VERSION_ghc "8.10.4"
+#define TOOL_VERSION_ghc "8.10.3"
 #endif /* TOOL_VERSION_ghc */
 #ifndef MIN_TOOL_VERSION_ghc
 #define MIN_TOOL_VERSION_ghc(major1,major2,minor) (\
   (major1) <  8 || \
   (major1) == 8 && (major2) <  10 || \
-  (major1) == 8 && (major2) == 10 && (minor) <= 4)
+  (major1) == 8 && (major2) == 10 && (minor) <= 3)
 #endif /* MIN_TOOL_VERSION_ghc */
 
-/* tool ghc-pkg-8.10.4 */
+/* tool ghc-pkg-8.10.3 */
 #ifndef TOOL_VERSION_ghc_pkg
-#define TOOL_VERSION_ghc_pkg "8.10.4"
+#define TOOL_VERSION_ghc_pkg "8.10.3"
 #endif /* TOOL_VERSION_ghc_pkg */
 #ifndef MIN_TOOL_VERSION_ghc_pkg
 #define MIN_TOOL_VERSION_ghc_pkg(major1,major2,minor) (\
   (major1) <  8 || \
   (major1) == 8 && (major2) <  10 || \
-  (major1) == 8 && (major2) == 10 && (minor) <= 4)
+  (major1) == 8 && (major2) == 10 && (minor) <= 3)
 #endif /* MIN_TOOL_VERSION_ghc_pkg */
 
 /* tool haddock-2.24.0 */
@@ -88,19 +88,22 @@
   (major1) == 0 && (major2) == 68 && (minor) <= 7)
 #endif /* MIN_TOOL_VERSION_hsc2hs */
 
-/* tool runghc-8.10.4 */
+/* tool runghc-8.10.3 */
 #ifndef TOOL_VERSION_runghc
-#define TOOL_VERSION_runghc "8.10.4"
+#define TOOL_VERSION_runghc "8.10.3"
 #endif /* TOOL_VERSION_runghc */
 #ifndef MIN_TOOL_VERSION_runghc
 #define MIN_TOOL_VERSION_runghc(major1,major2,minor) (\
   (major1) <  8 || \
   (major1) == 8 && (major2) <  10 || \
-  (major1) == 8 && (major2) == 10 && (minor) <= 4)
+  (major1) == 8 && (major2) == 10 && (minor) <= 3)
 #endif /* MIN_TOOL_VERSION_runghc */
 
+#ifndef CURRENT_PACKAGE_KEY
+#define CURRENT_PACKAGE_KEY "sudoku-0.1.0.0-3ayhNbPl7aa3Y1UUZyJL2w"
+#endif /* CURRENT_PACKAGE_KEY */
 #ifndef CURRENT_COMPONENT_ID
-#define CURRENT_COMPONENT_ID "sudoku-0.1.0.0-3ayhNbPl7aa3Y1UUZyJL2w-sudoku"
+#define CURRENT_COMPONENT_ID "sudoku-0.1.0.0-3ayhNbPl7aa3Y1UUZyJL2w"
 #endif /* CURRENT_COMPONENT_ID */
 #ifndef CURRENT_PACKAGE_VERSION
 #define CURRENT_PACKAGE_VERSION "0.1.0.0"

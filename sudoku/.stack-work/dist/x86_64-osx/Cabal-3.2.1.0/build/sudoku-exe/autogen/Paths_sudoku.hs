@@ -29,12 +29,12 @@ version :: Version
 version = Version [0,1,0,0] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
-bindir     = "/Users/cosimo/Documents/Coding/CS557_Functional_Programming/sudoku_haskell/sudoku/.stack-work/install/x86_64-osx/d8a7e3b7eecd687c77783c96b5c53393281972b2118c511f104e11f4e70dfc75/8.10.4/bin"
-libdir     = "/Users/cosimo/Documents/Coding/CS557_Functional_Programming/sudoku_haskell/sudoku/.stack-work/install/x86_64-osx/d8a7e3b7eecd687c77783c96b5c53393281972b2118c511f104e11f4e70dfc75/8.10.4/lib/x86_64-osx-ghc-8.10.4/sudoku-0.1.0.0-3ayhNbPl7aa3Y1UUZyJL2w-sudoku"
-dynlibdir  = "/Users/cosimo/Documents/Coding/CS557_Functional_Programming/sudoku_haskell/sudoku/.stack-work/install/x86_64-osx/d8a7e3b7eecd687c77783c96b5c53393281972b2118c511f104e11f4e70dfc75/8.10.4/lib/x86_64-osx-ghc-8.10.4"
-datadir    = "/Users/cosimo/Documents/Coding/CS557_Functional_Programming/sudoku_haskell/sudoku/.stack-work/install/x86_64-osx/d8a7e3b7eecd687c77783c96b5c53393281972b2118c511f104e11f4e70dfc75/8.10.4/share/x86_64-osx-ghc-8.10.4/sudoku-0.1.0.0"
-libexecdir = "/Users/cosimo/Documents/Coding/CS557_Functional_Programming/sudoku_haskell/sudoku/.stack-work/install/x86_64-osx/d8a7e3b7eecd687c77783c96b5c53393281972b2118c511f104e11f4e70dfc75/8.10.4/libexec/x86_64-osx-ghc-8.10.4/sudoku-0.1.0.0"
-sysconfdir = "/Users/cosimo/Documents/Coding/CS557_Functional_Programming/sudoku_haskell/sudoku/.stack-work/install/x86_64-osx/d8a7e3b7eecd687c77783c96b5c53393281972b2118c511f104e11f4e70dfc75/8.10.4/etc"
+bindir     = "/Users/cosimo/Documents/Coding/CS557_Functional_Programming/sudoku_haskell/sudoku/.stack-work/install/x86_64-osx/2ce660428f3c267fa30995bf3a0f861ac37c4ed5840a53b6cba93b99ce9ff5b9/8.10.3/bin"
+libdir     = "/Users/cosimo/Documents/Coding/CS557_Functional_Programming/sudoku_haskell/sudoku/.stack-work/install/x86_64-osx/2ce660428f3c267fa30995bf3a0f861ac37c4ed5840a53b6cba93b99ce9ff5b9/8.10.3/lib/x86_64-osx-ghc-8.10.3/sudoku-0.1.0.0-Jdvp2bxnHRU2Aq13O12ukn-sudoku-exe"
+dynlibdir  = "/Users/cosimo/Documents/Coding/CS557_Functional_Programming/sudoku_haskell/sudoku/.stack-work/install/x86_64-osx/2ce660428f3c267fa30995bf3a0f861ac37c4ed5840a53b6cba93b99ce9ff5b9/8.10.3/lib/x86_64-osx-ghc-8.10.3"
+datadir    = "/Users/cosimo/Documents/Coding/CS557_Functional_Programming/sudoku_haskell/sudoku/.stack-work/install/x86_64-osx/2ce660428f3c267fa30995bf3a0f861ac37c4ed5840a53b6cba93b99ce9ff5b9/8.10.3/share/x86_64-osx-ghc-8.10.3/sudoku-0.1.0.0"
+libexecdir = "/Users/cosimo/Documents/Coding/CS557_Functional_Programming/sudoku_haskell/sudoku/.stack-work/install/x86_64-osx/2ce660428f3c267fa30995bf3a0f861ac37c4ed5840a53b6cba93b99ce9ff5b9/8.10.3/libexec/x86_64-osx-ghc-8.10.3/sudoku-0.1.0.0"
+sysconfdir = "/Users/cosimo/Documents/Coding/CS557_Functional_Programming/sudoku_haskell/sudoku/.stack-work/install/x86_64-osx/2ce660428f3c267fa30995bf3a0f861ac37c4ed5840a53b6cba93b99ce9ff5b9/8.10.3/etc"
 
 getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: IO FilePath
 getBinDir = catchIO (getEnv "sudoku_bindir") (\_ -> return bindir)
