@@ -90,109 +90,197 @@ instance Show Board where
 test :: Index -> Cell
 test (x, y) =
   case (x, y) of
-    -- TODO Block 1 used for testing to be removed when testing the game
-    (C0, C0) -> Mark One
-    (C0, C1) -> Mark Two
-    (C0, C2) -> Mark Three
-    (C1, C0) -> Mark Five
-    (C1, C1) -> Mark Four
-    (C1, C2) -> Mark Seven
-    (C2, C0) -> Mark Eight
-    (C2, C1) -> Mark Nine
-    (C2, C2) -> Mark Six
     -- Block 1
-    -- (C0, C0) -> Empty
-    -- (C0, C1) -> Mark Three
-    -- (C0, C2) -> Empty
-    -- (C1, C0) -> Empty
-    -- (C1, C1) -> Mark Four
-    -- (C1, C2) -> Empty
-    -- (C2, C0) -> Empty
-    -- (C2, C1) -> Empty
-    -- (C2, C2) -> Mark Six
+    (C0, C0) -> Mark Five
+    (C0, C1) -> Mark Three
+    (C0, C2) -> Empty
+    (C1, C0) -> Mark Six
+    (C1, C1) -> Empty
+    (C1, C2) -> Empty
+    (C2, C0) -> Empty
+    (C2, C1) -> Mark Nine
+    (C2, C2) -> Mark Eight
     -- Block 2
     (C0, C3) -> Empty
-    (C0, C4) -> Mark Five
+    (C0, C4) -> Mark Seven
     (C0, C5) -> Empty
-    (C1, C3) -> Empty
+    (C1, C3) -> Mark One
     (C1, C4) -> Mark Nine
-    (C1, C5) -> Empty
+    (C1, C5) -> Mark Five
     (C2, C3) -> Empty
     (C2, C4) -> Empty
     (C2, C5) -> Empty
     -- Block 3
-    (C0, C6) -> Mark Four
+    (C0, C6) -> Empty
     (C0, C7) -> Empty
-    (C0, C8) -> Mark Six
-    (C1, C6) -> Mark Two
-    (C1, C7) -> Mark One
-    (C1, C8) -> Mark Eight
-    (C2, C6) -> Mark Seven
-    (C2, C7) -> Mark Five
-    (C2, C8) -> Mark Three
+    (C0, C8) -> Empty
+    (C1, C6) -> Empty
+    (C1, C7) -> Empty
+    (C1, C8) -> Empty
+    (C2, C6) -> Empty
+    (C2, C7) -> Mark Six
+    (C2, C8) -> Empty
     -- Block 4
-    (C3, C0) -> Empty
+    (C3, C0) -> Mark Eight
     (C3, C1) -> Empty
     (C3, C2) -> Empty
-    (C4, C0) -> Mark Nine
+    (C4, C0) -> Mark Four
     (C4, C1) -> Empty
-    (C4, C2) -> Mark Four
-    (C5, C0) -> Empty
-    (C5, C1) -> Mark Five
-    (C5, C2) -> Mark Seven
+    (C4, C2) -> Empty
+    (C5, C0) -> Mark Seven
+    (C5, C1) -> Empty
+    (C5, C2) -> Empty
     -- Block 5
     (C3, C3) -> Empty
-    (C3, C4) -> Empty
+    (C3, C4) -> Mark Six
     (C3, C5) -> Empty
-    (C4, C3) -> Empty
-    (C4, C4) -> Mark Seven
-    (C4, C5) -> Mark Two
+    (C4, C3) -> Mark Eight
+    (C4, C4) -> Empty
+    (C4, C5) -> Mark Three
     (C5, C3) -> Empty
-    (C5, C4) -> Mark Three
+    (C5, C4) -> Mark Two
     (C5, C5) -> Empty
     -- Block 6
     (C3, C6) -> Empty
-    (C3, C7) -> Mark Two
-    (C3, C8) -> Empty
+    (C3, C7) -> Empty
+    (C3, C8) -> Mark Three
     (C4, C6) -> Empty
-    (C4, C7) -> Mark Three
-    (C4, C8) -> Empty
-    (C5, C6) -> Mark Six
+    (C4, C7) -> Empty
+    (C4, C8) -> Mark One
+    (C5, C6) -> Empty
     (C5, C7) -> Empty
-    (C5, C8) -> Empty
+    (C5, C8) -> Mark Six
     -- Block 7
-    (C6, C0) -> Mark Three
-    (C6, C1) -> Mark Seven
+    (C6, C0) -> Empty
+    (C6, C1) -> Mark Six
     (C6, C2) -> Empty
-    (C7, C0) -> Mark Five
-    (C7, C1) -> Mark Six
+    (C7, C0) -> Empty
+    (C7, C1) -> Empty
     (C7, C2) -> Empty
-    (C8, C0) -> Mark Four
+    (C8, C0) -> Empty
     (C8, C1) -> Empty
     (C8, C2) -> Empty
     -- Block 8
-    (C6, C3) -> Mark Four
-    (C6, C4) -> Mark One
-    (C6, C5) -> Mark Five
-    (C7, C3) -> Mark Nine
-    (C7, C4) -> Empty
-    (C7, C5) -> Mark Eight
+    (C6, C3) -> Empty
+    (C6, C4) -> Empty
+    (C6, C5) -> Empty
+    (C7, C3) -> Mark Four
+    (C7, C4) -> Mark One
+    (C7, C5) -> Mark Nine
     (C8, C3) -> Empty
-    (C8, C4) -> Empty
-    (C8, C5) -> Mark Three
+    (C8, C4) -> Mark Eight
+    (C8, C5) -> Empty
     -- Block 9
-    (C6, C6) -> Empty
-    (C6, C7) -> Empty
-    (C6, C8) -> Mark Two
-    (C7, C6) -> Mark Three
+    (C6, C6) -> Mark Two
+    (C6, C7) -> Mark Eight
+    (C6, C8) -> Empty
+    (C7, C6) -> Empty
     (C7, C7) -> Empty
-    (C7, C8) -> Mark Four
+    (C7, C8) -> Mark Five
     (C8, C6) -> Empty
-    (C8, C7) -> Empty
-    (C8, C8) -> Mark Five
+    (C8, C7) -> Mark Seven
+    (C8, C8) -> Mark Nine
+
+testSolved :: Index -> Cell
+testSolved (x, y) =
+  case (x, y) of
+    -- Block 1
+    (C0, C0) -> Mark Five
+    (C0, C1) -> Mark Three
+    (C0, C2) -> Mark Four
+    (C1, C0) -> Mark Six
+    (C1, C1) -> Mark Seven
+    (C1, C2) -> Mark Two
+    (C2, C0) -> Mark One
+    (C2, C1) -> Mark Nine
+    (C2, C2) -> Mark Eight
+    -- Block 2
+    (C0, C3) -> Mark Six
+    (C0, C4) -> Mark Seven
+    (C0, C5) -> Mark Eight
+    (C1, C3) -> Mark One
+    (C1, C4) -> Mark Nine
+    (C1, C5) -> Mark Five
+    (C2, C3) -> Mark Three
+    (C2, C4) -> Mark Four
+    (C2, C5) -> Mark Two
+    -- Block 3
+    (C0, C6) -> Mark Nine
+    (C0, C7) -> Mark One
+    (C0, C8) -> Mark Two
+    (C1, C6) -> Mark Three
+    (C1, C7) -> Mark Four
+    (C1, C8) -> Mark Eight
+    (C2, C6) -> Mark Five
+    (C2, C7) -> Mark Six
+    (C2, C8) -> Mark Seven
+    -- Block 4
+    (C3, C0) -> Mark Eight
+    (C3, C1) -> Mark Five
+    (C3, C2) -> Mark Nine
+    (C4, C0) -> Mark Four
+    (C4, C1) -> Mark Two
+    (C4, C2) -> Mark Six
+    (C5, C0) -> Mark Seven
+    (C5, C1) -> Mark One
+    (C5, C2) -> Mark Three
+    -- Block 5
+    (C3, C3) -> Mark Seven
+    (C3, C4) -> Mark Six
+    (C3, C5) -> Mark One
+    (C4, C3) -> Mark Eight
+    (C4, C4) -> Mark Five
+    (C4, C5) -> Mark Three
+    (C5, C3) -> Mark Nine
+    (C5, C4) -> Mark Two
+    (C5, C5) -> Mark Four
+    -- Block 6
+    (C3, C6) -> Mark Four
+    (C3, C7) -> Mark Two
+    (C3, C8) -> Mark Three
+    (C4, C6) -> Mark Seven
+    (C4, C7) -> Mark Nine
+    (C4, C8) -> Mark One
+    (C5, C6) -> Mark Eight
+    (C5, C7) -> Mark Five
+    (C5, C8) -> Mark Six
+    -- Block 7
+    (C6, C0) -> Mark Nine
+    (C6, C1) -> Mark Six
+    (C6, C2) -> Mark One
+    (C7, C0) -> Mark Two
+    (C7, C1) -> Mark Eight
+    (C7, C2) -> Mark Seven
+    (C8, C0) -> Mark Three
+    (C8, C1) -> Mark Four
+    (C8, C2) -> Mark Five
+    -- Block 8
+    (C6, C3) -> Mark Five
+    (C6, C4) -> Mark Three
+    (C6, C5) -> Mark Seven
+    (C7, C3) -> Mark Four
+    (C7, C4) -> Mark One
+    (C7, C5) -> Mark Nine
+    (C8, C3) -> Mark Two
+    (C8, C4) -> Mark Eight
+    (C8, C5) -> Mark Six
+    -- Block 9
+    (C6, C6) -> Mark Two
+    (C6, C7) -> Mark Eight
+    (C6, C8) -> Mark Four
+    (C7, C6) -> Mark Six
+    (C7, C7) -> Mark Three
+    (C7, C8) -> Mark Five
+    (C8, C6) -> Mark One
+    (C8, C7) -> Mark Seven
+    (C8, C8) -> Mark Nine
+ 
 
 tBoard :: Board
 tBoard = Board test
+
+tSolvedBoard :: Board
+tSolvedBoard = Board testSolved
 
 -- Check if a number is in a row
 checkRow :: Board -> Player -> Coordinate -> Bool
