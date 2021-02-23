@@ -274,7 +274,6 @@ testSolved (x, y) =
     (C8, C6) -> Mark One
     (C8, C7) -> Mark Seven
     (C8, C8) -> Mark Nine
- 
 
 tBoard :: Board
 tBoard = Board test
@@ -374,6 +373,26 @@ checkBlock8ForAll b = and [checkBlock8 b n | n <- numbers]
 -- Check if all 9 numbers are in block 9
 checkBlock9ForAll :: Board -> Bool
 checkBlock9ForAll b = and [checkBlock9 b n | n <- numbers]
+
+checkAllBlocks :: Board -> Bool
+checkAllBlocks b =
+  checkBlock1ForAll b
+    && checkBlock2ForAll b
+    && checkBlock3ForAll b
+    && checkBlock4ForAll b
+    && checkBlock5ForAll b
+    && checkBlock6ForAll b
+    && checkBlock7ForAll b
+    && checkBlock8ForAll b
+    && checkBlock9ForAll b
+
+-- Return true if every row, column and block have numbers from 1 to 9
+solve :: Board -> String
+solve b
+  | won = "You Solved Sudoku!"
+  | not won = "You lose! :("
+  where
+    won = checkAllRows b && checkAllColumns b && checkAllBlocks b
 
 -- type Board = [[Cell]]
 
