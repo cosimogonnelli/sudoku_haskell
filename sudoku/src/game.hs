@@ -400,3 +400,77 @@ checkBlock9ForAll b = and [checkBlock9 b n | n <- numbers]
 -- showBoard :: Board -> String
 -- showBoard b =
 --   let rows = map (\row -> "test" ++ (show $ row !! 0) ++ "test" ++ (show $ row !! 1) ++ "test" ++ (show $ row !! 2) ++ "test" ++ (show $ row !! 3) ++ "test" ++ (show $ row !! 4) ++ "test" ++ (show $ row !! 5) ++ "test" ++ (show $ row !! 6) ++ "test" ++ (show $ row !! 7) ++ "test" ++ (show $ row !! 8) ++ "test") b in (intercalate "\n+-----+-----+-----+\n" rows) ++ "\n"
+
+-- The emptyAt function tests whether a given index on a board is empty.
+
+-- won :: Board -> Bool
+-- won b = undefined
+
+-- strikeOut :: Bool
+-- strikeOut = undefined
+
+emptyAt :: Board -> Index -> Bool
+emptyAt b i = cell b i == Empty
+
+-- inProgress :: Board -> Bool
+-- inProgress b = not (won b) || strikeOut
+
+write :: Index -> Player -> Board -> Board
+write i x b =
+  Board $ \i' ->
+    if i == i' && emptyAt b i then
+      Mark x
+    else
+      cell b i'
+
+-- I/O Player Code
+
+readCoord :: Char -> Maybe Coordinate
+readCoord '1' = Just C0
+readCoord '2' = Just C1
+readCoord '3' = Just C2
+readCoord '4' = Just C3
+readCoord '5' = Just C4
+readCoord '6' = Just C5
+readCoord '7' = Just C6
+readCoord '8' = Just C7
+readCoord '9' = Just C8
+readCoord _ = Nothing
+
+readNum :: Char -> Maybe Player
+readNum '1' = Just One
+readNum '2' = Just Two
+readNum '3' = Just Three
+readNum '4' = Just Four
+readNum '5' = Just Five
+readNum '6' = Just Six
+readNum '7' = Just Seven
+readNum '8' = Just Eight
+readNum '9' = Just Nine
+readNum _ = Nothing
+
+playerAct :: Board -> IO Board
+playerAct b = do
+  input <- getLine
+  let tryAgain msg = putStrLn msg >> playerAct b
+  case input of
+    [cx, ' ', cy, ' ', number] ->
+      case (readCoord cx, readCoord cy, readNum number) of
+        (Just cx', Just cy', Just number') -> let i = (cx',cy') in
+          if emptyAt b i then return $ write i number' b
+          else tryAgain "illegal move"
+        (Nothing, _, _) -> tryAgain "invalid input on first coordinate"
+        (_, Nothing, _) -> tryAgain "invalid input on second coordinate"
+        (_, _, Nothing) -> tryAgain "invalid input on number"
+    _ -> tryAgain "invalid input"
+
+-- exitMsg :: Board -> IO ()
+-- exitMsg b = do
+--  if won b then putStrLn "You win!"
+--  else putStrLn "You made too many errors. Therefore, you lose!"
+
+play :: Board -> IO ()
+play b = do
+  print b
+  b' <- playerAct b
+  print b'
