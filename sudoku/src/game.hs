@@ -301,6 +301,35 @@ checkColumnForAll b cy = and [checkRow b n cy | n <- numbers]
 checkAllColumns :: Board -> Bool
 checkAllColumns b = and [checkRowForAll b cy | cy <- coordinates]
 
+-- Check if a number is in a block
+checkBlock :: Board -> Player -> [Coordinate] -> [Coordinate] -> Bool
+checkBlock b p xb yb = Mark p `elem` [cell b (x, y) | x <- xb, y <- yb]
+
+-- Check if all 9 numbers are in a block
+checkBlockForAll :: Board -> [Coordinate] -> [Coordinate] -> Bool
+checkBlockForAll b xb yb = and [checkBlock b n xb yb | n <- numbers]
+
+-- Check if every Block have all 9 numbers
+checkAllBlocks :: Board -> Bool
+checkAllBlocks b =
+  checkBlockForAll b coBlock1 coBlock1
+    && checkBlockForAll b coBlock1 coBlock2
+    && checkBlockForAll b coBlock1 coBlock3
+    && checkBlockForAll b coBlock2 coBlock1
+    && checkBlockForAll b coBlock2 coBlock2
+    && checkBlockForAll b coBlock2 coBlock3
+    && checkBlockForAll b coBlock3 coBlock1
+    && checkBlockForAll b coBlock3 coBlock2
+    && checkBlockForAll b coBlock3 coBlock3
+
+-- Return true if every row, column and block have numbers from 1 to 9
+solve :: Board -> String
+solve b
+  | won = "You Won! :)"
+  | not won = "You lose! :("
+  where
+    won = checkAllRows b && checkAllColumns b && checkAllBlocks b
+
 emptyAt :: Board -> Index -> Bool
 emptyAt b i = cell b i == Empty
 
@@ -369,32 +398,3 @@ play b = do
   putStrLn ""
   print b'
   
--- Check if a number is in a block
-checkBlock :: Board -> Player -> [Coordinate] -> [Coordinate] -> Bool
-checkBlock b p xb yb = Mark p `elem` [cell b (x, y) | x <- xb, y <- yb]
-
--- Check if all 9 numbers are in a block
-checkBlockForAll :: Board -> [Coordinate] -> [Coordinate] -> Bool
-checkBlockForAll b xb yb = and [checkBlock b n xb yb | n <- numbers]
-
--- Check if every Block have all 9 numbers
-checkAllBlocks :: Board -> Bool
-checkAllBlocks b =
-  checkBlockForAll b coBlock1 coBlock1
-    && checkBlockForAll b coBlock1 coBlock2
-    && checkBlockForAll b coBlock1 coBlock3
-    && checkBlockForAll b coBlock2 coBlock1
-    && checkBlockForAll b coBlock2 coBlock2
-    && checkBlockForAll b coBlock2 coBlock3
-    && checkBlockForAll b coBlock3 coBlock1
-    && checkBlockForAll b coBlock3 coBlock2
-    && checkBlockForAll b coBlock3 coBlock3
-
--- Return true if every row, column and block have numbers from 1 to 9
-solve :: Board -> String
-solve b
-  | won = "You Won! :)"
-  | not won = "You lose! :("
-  where
-    won = checkAllRows b && checkAllColumns b && checkAllBlocks b
-
