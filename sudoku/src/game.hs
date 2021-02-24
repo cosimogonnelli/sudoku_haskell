@@ -364,7 +364,9 @@ playerAct b = do
 play :: Board -> IO ()
 play b = do
   print b
+  putStrLn "Enter rowNum colNum sudokuNum:" 
   b' <- playerAct b
+  putStrLn ""
   print b'
   
 -- Check if a number is in a block
