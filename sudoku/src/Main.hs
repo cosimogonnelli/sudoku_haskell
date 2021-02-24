@@ -11,6 +11,7 @@ main = do
   putStrLn "The hint will be given in the same format used for entering a number.\n"
   putStrLn "Type 'exit' at any time to quit.\n"
   putStrLn "Starting board (size: 9x9)"
+  play tBoard
 
 -- putStrLn $ showBoard emptyBoard
 
