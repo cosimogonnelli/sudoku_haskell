@@ -16,9 +16,13 @@ type Index = (Coordinate, Coordinate)
 coordinates :: [Coordinate]
 coordinates = [C0, C1, C2, C3, C4, C5, C6, C7, C8]
 
--- List of coordinates Blocks.
--- These are used to check each block
--- For example block 1 is made of two coBlock1
+-- List of coordinate Blocks.
+-- These are used to check each block solution
+-- A Board is represented as below
+-- coBlock 1 2 3
+-- 1       1 2 3
+-- 2       4 5 6
+-- 3       7 8 9
 coBlock1 :: [Coordinate]
 coBlock1 = [C0, C1, C2]
 
@@ -39,11 +43,6 @@ rowIndices cy = [(cy, y) | y <- coordinates]
 
 columnIndices :: Coordinate -> [Index]
 columnIndices cx = [(cx, x) | x <- coordinates]
-
--- TODO
--- For the check we also need to control each of 3x3 blocks
--- blockIndex :: coordinates -> [Index]
--- blockIndex cx cy = undefined
 
 -- List of lists of rows by index
 boardRows :: [[Index]]
@@ -75,18 +74,13 @@ instance Show Cell where
     | a == Eight = "8"
     | a == Nine = "9"
 
-data Board = Board {cell :: Index -> Cell}
+newtype Board = Board {cell :: Index -> Cell}
 
 instance Show Board where
   show b =
     unlines (map (concat . intersperse " " . map (show . cell b)) boardRows)
 
 -- Board used for testing purpose
--- Reference: https://sudoku.com/easy/
--- Each block is composed of 9 cells (3x3)
--- blocks 1 2 3
---        4 5 6
---        7 8 9
 test :: Index -> Cell
 test (x, y) =
   case (x, y) of
@@ -275,9 +269,11 @@ testSolved (x, y) =
     (C8, C7) -> Mark Seven
     (C8, C8) -> Mark Nine
 
+-- Print test
 tBoard :: Board
 tBoard = Board test
 
+-- Print solved
 tSolvedBoard :: Board
 tSolvedBoard = Board testSolved
 
@@ -289,7 +285,7 @@ checkRow b p cx = Mark p `elem` [cell b (cx, y) | y <- coordinates]
 checkRowForAll :: Board -> Coordinate -> Bool
 checkRowForAll b cx = and [checkRow b n cx | n <- numbers]
 
--- Check if every row has all 9 numbers
+-- Check if every row have all 9 numbers
 checkAllRows :: Board -> Bool
 checkAllRows b = and [checkRowForAll b cx | cx <- coordinates]
 
@@ -301,121 +297,35 @@ checkColumn b p cy = Mark p `elem` [cell b (x, cy) | x <- coordinates]
 checkColumnForAll :: Board -> Coordinate -> Bool
 checkColumnForAll b cy = and [checkRow b n cy | n <- numbers]
 
--- Check if every row has all 9 numbers
+-- Check if every column have all 9 numbers
 checkAllColumns :: Board -> Bool
 checkAllColumns b = and [checkRowForAll b cy | cy <- coordinates]
 
--- Below are series of check blocks functions used to check the 9 blocks of
--- the Sudoku board. The board representations is as below:
--- coBlock 1 2 3
--- 1       1 2 3
--- 2       4 5 6
--- 3       7 8 9
-checkBlock1 :: Board -> Player -> Bool
-checkBlock1 b p = Mark p `elem` [cell b (x, y) | x <- coBlock1, y <- coBlock1]
+-- Check if a number is in a block
+checkBlock :: Board -> Player -> [Coordinate] -> [Coordinate] -> Bool
+checkBlock b p xb yb = Mark p `elem` [cell b (x, y) | x <- xb, y <- yb]
 
-checkBlock2 :: Board -> Player -> Bool
-checkBlock2 b p = Mark p `elem` [cell b (x, y) | x <- coBlock1, y <- coBlock2]
+-- Check if all 9 numbers are in a block
+checkBlockForAll :: Board -> [Coordinate] -> [Coordinate] -> Bool
+checkBlockForAll b xb yb = and [checkBlock b n xb yb | n <- numbers]
 
-checkBlock3 :: Board -> Player -> Bool
-checkBlock3 b p = Mark p `elem` [cell b (x, y) | x <- coBlock1, y <- coBlock3]
-
-checkBlock4 :: Board -> Player -> Bool
-checkBlock4 b p = Mark p `elem` [cell b (x, y) | x <- coBlock2, y <- coBlock1]
-
-checkBlock5 :: Board -> Player -> Bool
-checkBlock5 b p = Mark p `elem` [cell b (x, y) | x <- coBlock2, y <- coBlock2]
-
-checkBlock6 :: Board -> Player -> Bool
-checkBlock6 b p = Mark p `elem` [cell b (x, y) | x <- coBlock2, y <- coBlock3]
-
-checkBlock7 :: Board -> Player -> Bool
-checkBlock7 b p = Mark p `elem` [cell b (x, y) | x <- coBlock3, y <- coBlock1]
-
-checkBlock8 :: Board -> Player -> Bool
-checkBlock8 b p = Mark p `elem` [cell b (x, y) | x <- coBlock3, y <- coBlock2]
-
-checkBlock9 :: Board -> Player -> Bool
-checkBlock9 b p = Mark p `elem` [cell b (x, y) | x <- coBlock3, y <- coBlock3]
-
--- Check if all 9 numbers are in block 1
-checkBlock1ForAll :: Board -> Bool
-checkBlock1ForAll b = and [checkBlock1 b n | n <- numbers]
-
--- Check if all 9 numbers are in block 2
-checkBlock2ForAll :: Board -> Bool
-checkBlock2ForAll b = and [checkBlock2 b n | n <- numbers]
-
--- Check if all 9 numbers are in block 3
-checkBlock3ForAll :: Board -> Bool
-checkBlock3ForAll b = and [checkBlock3 b n | n <- numbers]
-
--- Check if all 9 numbers are in block 4
-checkBlock4ForAll :: Board -> Bool
-checkBlock4ForAll b = and [checkBlock4 b n | n <- numbers]
-
--- Check if all 9 numbers are in block 5
-checkBlock5ForAll :: Board -> Bool
-checkBlock5ForAll b = and [checkBlock5 b n | n <- numbers]
-
--- Check if all 9 numbers are in block 6
-checkBlock6ForAll :: Board -> Bool
-checkBlock6ForAll b = and [checkBlock6 b n | n <- numbers]
-
--- Check if all 9 numbers are in block 7
-checkBlock7ForAll :: Board -> Bool
-checkBlock7ForAll b = and [checkBlock7 b n | n <- numbers]
-
--- Check if all 9 numbers are in block 8
-checkBlock8ForAll :: Board -> Bool
-checkBlock8ForAll b = and [checkBlock8 b n | n <- numbers]
-
--- Check if all 9 numbers are in block 9
-checkBlock9ForAll :: Board -> Bool
-checkBlock9ForAll b = and [checkBlock9 b n | n <- numbers]
-
+-- Check if every Block have all 9 numbers
 checkAllBlocks :: Board -> Bool
 checkAllBlocks b =
-  checkBlock1ForAll b
-    && checkBlock2ForAll b
-    && checkBlock3ForAll b
-    && checkBlock4ForAll b
-    && checkBlock5ForAll b
-    && checkBlock6ForAll b
-    && checkBlock7ForAll b
-    && checkBlock8ForAll b
-    && checkBlock9ForAll b
+  checkBlockForAll b coBlock1 coBlock1
+    && checkBlockForAll b coBlock1 coBlock2
+    && checkBlockForAll b coBlock1 coBlock3
+    && checkBlockForAll b coBlock2 coBlock1
+    && checkBlockForAll b coBlock2 coBlock2
+    && checkBlockForAll b coBlock2 coBlock3
+    && checkBlockForAll b coBlock3 coBlock1
+    && checkBlockForAll b coBlock3 coBlock2
+    && checkBlockForAll b coBlock3 coBlock3
 
 -- Return true if every row, column and block have numbers from 1 to 9
 solve :: Board -> String
 solve b
-  | won = "You Solved Sudoku!"
+  | won = "You Won! :)"
   | not won = "You lose! :("
   where
     won = checkAllRows b && checkAllColumns b && checkAllBlocks b
-
--- type Board = [[Cell]]
-
--- -- Create a list of lists of cells with all empty
--- emptyBoard :: [[Cell]]
--- emptyBoard = replicate 9 $ replicate 9 Empty
-
--- -- Starting board: level easy
--- -- https://sudoku.com/easy/
--- easyBoard :: [[Cell]]
--- easyBoard =
---   [ [Empty, Mark Three, Empty, Empty, Mark Four, Empty, Empty, Empty, Mark Six],
---     [Empty, Mark Five, Empty, Empty, Mark Nine, Empty, Empty, Empty, Empty],
---     [Mark Four, Empty, Mark Six, Mark Two, Mark One, Mark Eight, Mark Seven, Mark Five, Mark Three],
---     [Empty, Empty, Empty, Mark Nine, Empty, Mark Four, Empty, Mark Five, Mark Seven],
---     [Empty, Empty, Empty, Empty, Mark Seven, Mark Two, Empty, Mark Three, Empty],
---     [Empty, Mark Two, Empty, Empty, Mark Three, Empty, Mark Six, Empty, Empty],
---     [Mark Three, Mark Seven, Empty, Mark Five, Mark Six, Empty, Mark Four, Empty, Empty],
---     [Mark Four, Mark One, Mark Five, Mark Nine, Empty, Mark Eight, Empty, Empty, Mark Three],
---     [Empty, Empty, Mark Two, Mark Three, Empty, Mark Four, Empty, Empty, Mark Five]
---   ]
-
--- -- Print the board in a hunan readable format
--- showBoard :: Board -> String
--- showBoard b =
---   let rows = map (\row -> "test" ++ (show $ row !! 0) ++ "test" ++ (show $ row !! 1) ++ "test" ++ (show $ row !! 2) ++ "test" ++ (show $ row !! 3) ++ "test" ++ (show $ row !! 4) ++ "test" ++ (show $ row !! 5) ++ "test" ++ (show $ row !! 6) ++ "test" ++ (show $ row !! 7) ++ "test" ++ (show $ row !! 8) ++ "test") b in (intercalate "\n+-----+-----+-----+\n" rows) ++ "\n"
