@@ -322,30 +322,28 @@ checkAllBlocks b =
     && checkBlockForAll b coBlock3 coBlock2
     && checkBlockForAll b coBlock3 coBlock3
 
+boardIsFull :: Board -> Bool
+boardIsFull b = Empty `notElem` [cell b (cx, cy) | cx <- coordinates, cy <- coordinates]
+
+gameInProgress :: Board -> Bool
+gameInProgress b = not (boardIsFull b)
+
 -- Return true if every row, column and block have numbers from 1 to 9
-solve :: Board -> String
+solve :: Board -> IO ()
 solve b
-  | won = "You Won! :)"
-  | not won = "You lose! :("
+  | won = putStrLn "You Won! :)"
+  | not won = putStrLn "You lose! :("
   where
     won = checkAllRows b && checkAllColumns b && checkAllBlocks b
 
 emptyAt :: Board -> Index -> Bool
 emptyAt b i = cell b i == Empty
 
--- inProgress :: Board -> Bool
--- inProgress b = not (won b) || strikeOut
-
 write :: Index -> Player -> Board -> Board
 write i x b =
-  Board $ \i' ->
-    if i == i' && emptyAt b i then
-      Mark x
-    else
-      cell b i'
+  Board $ \i' -> if (i == i' && emptyAt b i) then Mark x else cell b i'
 
 -- I/O Player Code
-
 readCoord :: Char -> Maybe Coordinate
 readCoord '1' = Just C0
 readCoord '2' = Just C1
@@ -377,9 +375,11 @@ playerAct b = do
   case input of
     [cx, ' ', cy, ' ', number] ->
       case (readCoord cx, readCoord cy, readNum number) of
-        (Just cx', Just cy', Just number') -> let i = (cx',cy') in
-          if emptyAt b i then return $ write i number' b
-          else tryAgain "illegal move"
+        (Just cx', Just cy', Just number') ->
+          let i = (cx', cy')
+           in if emptyAt b i
+                then return $ write i number' b
+                else tryAgain "illegal move"
         (Nothing, _, _) -> tryAgain "invalid input on first coordinate"
         (_, Nothing, _) -> tryAgain "invalid input on second coordinate"
         (_, _, Nothing) -> tryAgain "invalid input on number"
@@ -390,11 +390,14 @@ playerAct b = do
 --  if won b then putStrLn "You win!"
 --  else putStrLn "You made too many errors. Therefore, you lose!"
 
+--TODO work on this function
 play :: Board -> IO ()
 play b = do
   print b
-  putStrLn "Enter rowNum colNum sudokuNum:" 
-  b' <- playerAct b
-  putStrLn ""
-  print b'
-  
+  if gameInProgress b
+    then do
+      putStrLn "Enter rowNum colNum sudokuNum or ask for help:"
+      b' <- playerAct b
+      putStrLn ""
+      if gameInProgress b' then play b' else solve b'
+    else solve b
