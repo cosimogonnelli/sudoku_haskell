@@ -345,11 +345,10 @@ write :: Index -> Player -> Board -> Board
 write i x b =
   Board $ \i' -> if (i == i' && emptyAt b i) then Mark x else cell b i'
 
--- getSolutionNumber :: Cell -> Player
--- getSolutionNumber c = cellToPlayer c
-
--- cellToPlayer :: Cell -> Player
--- cellToPlayer 1 = One
+-- TODO: we can use this to write to the board the number from the user and the solution board. We will be able to delete the function above prabably
+write2 :: Index -> Cell -> Board -> Board
+write2 i x b =
+  Board $ \i' -> if (i == i' && emptyAt b i) then x else cell b i'
 
 -- I/O Player Code
 readCoord :: Char -> Maybe Coordinate
@@ -404,16 +403,11 @@ hint b = do
           let i = (cx', cy')
            in if emptyAt b i
                 then -- then return $ write i readNum (cell tSolvedBoard i) b --(One) b
-                  return $ write i (read "One" :: Player) b --TODO: we need to pass in a Player retrieved from a solution board
+                  return $ write2 i (cell tSolvedBoard i) b --TODO: in this example the num that is passed in is not the user num but the enum form the solution board
                 else tryAgain "illegal move"
         (Nothing, _) -> tryAgain "invalid input on first coordinate"
         (_, Nothing) -> tryAgain "invalid input on second coordinate"
     _ -> tryAgain "invalid input"
-
--- exitMsg :: Board -> IO ()
--- exitMsg b = do
---  if won b then putStrLn "You win!"
---  else putStrLn "You made too many errors. Therefore, you lose!"
 
 --TODO: add logical comparison to let the user select hint or enter a number
 play :: Board -> IO ()
@@ -422,7 +416,8 @@ play b = do
   if gameInProgress b
     then do
       putStrLn "Enter rowNum colNum sudokuNum or ask for help:"
-      --FIXME: this is the code for playing the game b' <- playerAct b
+      --FIXME: this is the code for playing the game
+      -- b' <- playerAct b
       b' <- hint b --FIXME: used for testing
       putStrLn ""
       if gameInProgress b' then play b' else solve b'
