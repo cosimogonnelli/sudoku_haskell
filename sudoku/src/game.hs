@@ -295,11 +295,11 @@ checkColumn b p cy = Mark p `elem` [cell b (x, cy) | x <- coordinates]
 
 -- Check if all 9 numbers are in a column
 checkColumnForAll :: Board -> Coordinate -> Bool
-checkColumnForAll b cy = and [checkRow b n cy | n <- numbers]
+checkColumnForAll b cy = and [checkColumn b n cy | n <- numbers]
 
 -- Check if every column have all 9 numbers
 checkAllColumns :: Board -> Bool
-checkAllColumns b = and [checkRowForAll b cy | cy <- coordinates]
+checkAllColumns b = and [checkColumnForAll b cy | cy <- coordinates]
 
 -- Check if a number is in a block
 checkBlock :: Board -> Player -> [Coordinate] -> [Coordinate] -> Bool
@@ -322,6 +322,8 @@ checkAllBlocks b =
     && checkBlockForAll b coBlock3 coBlock2
     && checkBlockForAll b coBlock3 coBlock3
 
+-- make a list of [block1, 2 3] then do a permutaion in a list comp then use all
+
 boardIsFull :: Board -> Bool
 boardIsFull b = Empty `notElem` [cell b (cx, cy) | cx <- coordinates, cy <- coordinates]
 
@@ -342,6 +344,12 @@ emptyAt b i = cell b i == Empty
 write :: Index -> Player -> Board -> Board
 write i x b =
   Board $ \i' -> if (i == i' && emptyAt b i) then Mark x else cell b i'
+
+-- getSolutionNumber :: Cell -> Player
+-- getSolutionNumber c = cellToPlayer c
+
+-- cellToPlayer :: Cell -> Player
+-- cellToPlayer 1 = One
 
 -- I/O Player Code
 readCoord :: Char -> Maybe Coordinate
@@ -385,19 +393,37 @@ playerAct b = do
         (_, _, Nothing) -> tryAgain "invalid input on number"
     _ -> tryAgain "invalid input"
 
+hint :: Board -> IO Board
+hint b = do
+  input <- getLine
+  let tryAgain msg = putStrLn msg >> hint b
+  case input of
+    [cx, ' ', cy, ' '] ->
+      case (readCoord cx, readCoord cy) of
+        (Just cx', Just cy') ->
+          let i = (cx', cy')
+           in if emptyAt b i
+                then -- then return $ write i readNum (cell tSolvedBoard i) b --(One) b
+                  return $ write i (read "One" :: Player) b --TODO: we need to pass in a Player retrieved from a solution board
+                else tryAgain "illegal move"
+        (Nothing, _) -> tryAgain "invalid input on first coordinate"
+        (_, Nothing) -> tryAgain "invalid input on second coordinate"
+    _ -> tryAgain "invalid input"
+
 -- exitMsg :: Board -> IO ()
 -- exitMsg b = do
 --  if won b then putStrLn "You win!"
 --  else putStrLn "You made too many errors. Therefore, you lose!"
 
---TODO work on this function
+--TODO: add logical comparison to let the user select hint or enter a number
 play :: Board -> IO ()
 play b = do
   print b
   if gameInProgress b
     then do
       putStrLn "Enter rowNum colNum sudokuNum or ask for help:"
-      b' <- playerAct b
+      --FIXME: this is the code for playing the game b' <- playerAct b
+      b' <- hint b --FIXME: used for testing
       putStrLn ""
       if gameInProgress b' then play b' else solve b'
     else solve b
