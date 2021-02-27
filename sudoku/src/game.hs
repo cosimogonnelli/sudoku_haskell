@@ -5,16 +5,11 @@ import Data.Ord ()
 import GHC.Generics ()
 
 -- The board is composed by 9x9 cells.
--- Each cells can be defined with an index type.
+-- Each cells can be defined with an index type of coordinates
 data Coordinate = C0 | C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8
   deriving (Eq, Ord, Show)
 
--- The index is a tuple of coordinates
 type Index = (Coordinate, Coordinate)
-
--- List of all coordinates
-coordinates :: [Coordinate]
-coordinates = [C0, C1, C2, C3, C4, C5, C6, C7, C8]
 
 -- List of coordinate Blocks.
 -- These are used to check each block solution
@@ -23,14 +18,8 @@ coordinates = [C0, C1, C2, C3, C4, C5, C6, C7, C8]
 -- 1       1 2 3
 -- 2       4 5 6
 -- 3       7 8 9
-coBlock1 :: [Coordinate]
-coBlock1 = [C0, C1, C2]
-
-coBlock2 :: [Coordinate]
-coBlock2 = [C3, C4, C5]
-
-coBlock3 :: [Coordinate]
-coBlock3 = [C6, C7, C8]
+coBlocks :: [[Coordinate]]
+coBlocks = [[C0, C1, C2], [C3, C4, C5], [C6, C7, C8]]
 
 -- List of all possible number options
 numbers :: [Player]
@@ -39,14 +28,14 @@ numbers = [One, Two, Three, Four, Five, Six, Seven, Eight, Nine]
 -- To check the game we need a list of rows and columns since for each row
 -- or columns we need to have numbers from 1 to 9 in order to have a valid board
 rowIndices :: Coordinate -> [Index]
-rowIndices cy = [(cy, y) | y <- coordinates]
+rowIndices cy = [(cy, y) | y <- concat coBlocks]
 
-columnIndices :: Coordinate -> [Index]
-columnIndices cx = [(cx, x) | x <- coordinates]
+-- columnIndices :: Coordinate -> [Index]
+-- columnIndices cx = [(cx, x) | x <- coordinates]
 
 -- List of lists of rows by index
 boardRows :: [[Index]]
-boardRows = [rowIndices c | c <- coordinates]
+boardRows = [rowIndices c | c <- concat coBlocks]
 
 -- List of all board indices
 allIndices :: [Index]
@@ -279,7 +268,7 @@ tSolvedBoard = Board testSolved
 
 -- Check if a number is in a row
 checkRow :: Board -> Player -> Coordinate -> Bool
-checkRow b p cx = Mark p `elem` [cell b (cx, y) | y <- coordinates]
+checkRow b p cx = Mark p `elem` [cell b (cx, y) | y <- concat coBlocks]
 
 -- Check if all 9 numbers are in a row
 checkRowForAll :: Board -> Coordinate -> Bool
@@ -287,11 +276,11 @@ checkRowForAll b cx = and [checkRow b n cx | n <- numbers]
 
 -- Check if every row have all 9 numbers
 checkAllRows :: Board -> Bool
-checkAllRows b = and [checkRowForAll b cx | cx <- coordinates]
+checkAllRows b = and [checkRowForAll b cx | cx <- concat coBlocks]
 
 -- Check if a number is in a Column
 checkColumn :: Board -> Player -> Coordinate -> Bool
-checkColumn b p cy = Mark p `elem` [cell b (x, cy) | x <- coordinates]
+checkColumn b p cy = Mark p `elem` [cell b (x, cy) | x <- concat coBlocks]
 
 -- Check if all 9 numbers are in a column
 checkColumnForAll :: Board -> Coordinate -> Bool
@@ -299,7 +288,7 @@ checkColumnForAll b cy = and [checkColumn b n cy | n <- numbers]
 
 -- Check if every column have all 9 numbers
 checkAllColumns :: Board -> Bool
-checkAllColumns b = and [checkColumnForAll b cy | cy <- coordinates]
+checkAllColumns b = and [checkColumnForAll b cy | cy <- concat coBlocks]
 
 -- Check if a number is in a block
 checkBlock :: Board -> Player -> [Coordinate] -> [Coordinate] -> Bool
@@ -311,21 +300,10 @@ checkBlockForAll b xb yb = and [checkBlock b n xb yb | n <- numbers]
 
 -- Check if every Block have all 9 numbers
 checkAllBlocks :: Board -> Bool
-checkAllBlocks b =
-  checkBlockForAll b coBlock1 coBlock1
-    && checkBlockForAll b coBlock1 coBlock2
-    && checkBlockForAll b coBlock1 coBlock3
-    && checkBlockForAll b coBlock2 coBlock1
-    && checkBlockForAll b coBlock2 coBlock2
-    && checkBlockForAll b coBlock2 coBlock3
-    && checkBlockForAll b coBlock3 coBlock1
-    && checkBlockForAll b coBlock3 coBlock2
-    && checkBlockForAll b coBlock3 coBlock3
-
--- make a list of [block1, 2 3] then do a permutaion in a list comp then use all
+checkAllBlocks b = and [checkBlockForAll b bx by | bx <- coBlocks, by <- coBlocks]
 
 boardIsFull :: Board -> Bool
-boardIsFull b = Empty `notElem` [cell b (cx, cy) | cx <- coordinates, cy <- coordinates]
+boardIsFull b = Empty `notElem` [cell b (cx, cy) | cx <- concat coBlocks, cy <- concat coBlocks]
 
 gameInProgress :: Board -> Bool
 gameInProgress b = not (boardIsFull b)
@@ -418,8 +396,8 @@ play b = do
     then do
       putStrLn "Enter rowNum colNum sudokuNum or ask for help:"
       --FIXME: this is the code for playing the game
-      -- b' <- playerAct b
-      b' <- hint b --FIXME: used for testing
+      b' <- playerAct b
+      -- b' <- hint b --FIXME: used for testing
       putStrLn ""
       if gameInProgress b' then play b' else solve b'
     else solve b
