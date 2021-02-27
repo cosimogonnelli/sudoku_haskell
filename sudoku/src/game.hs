@@ -341,11 +341,6 @@ solve b
 emptyAt :: Board -> Index -> Bool
 emptyAt b i = cell b i == Empty
 
-write :: Index -> Player -> Board -> Board
-write i x b =
-  Board $ \i' -> if (i == i' && emptyAt b i) then Mark x else cell b i'
-
--- TODO: we can use this to write to the board the number from the user and the solution board. We will be able to delete the function above prabably
 write2 :: Index -> Cell -> Board -> Board
 write2 i x b =
   Board $ \i' -> if (i == i' && emptyAt b i) then x else cell b i'
@@ -363,18 +358,17 @@ readCoord '8' = Just C7
 readCoord '9' = Just C8
 readCoord _ = Nothing
 
-readNum :: Char -> Cell
-readNum '1' = Mark One
-readNum '2' = Mark Two
-readNum '3' = Mark Three
-readNum '4' = Mark Four
-readNum '5' = Mark Five
-readNum '6' = Mark Six
-readNum '7' = Mark Seven
-readNum '8' = Mark Eight
-readNum '9' = Mark Nine
-
--- readNum _ = Nothing
+readNum :: Char -> Maybe Cell
+readNum '1' = Just (Mark One)
+readNum '2' = Just (Mark Two)
+readNum '3' = Just (Mark Three)
+readNum '4' = Just (Mark Four)
+readNum '5' = Just (Mark Five)
+readNum '6' = Just (Mark Six)
+readNum '7' = Just (Mark Seven)
+readNum '8' = Just (Mark Eight)
+readNum '9' = Just (Mark Nine)
+readNum _ = Nothing
 
 playerAct :: Board -> IO Board
 playerAct b = do
@@ -383,43 +377,33 @@ playerAct b = do
   case input of
     [cx, ' ', cy, ' ', number] ->
       case (readCoord cx, readCoord cy, readNum number) of
-        (Just cx', Just cy', number') ->
+        (Just cx', Just cy', Just number') ->
           let i = (cx', cy')
            in if emptyAt b i
                 then return $ write2 i number' b
                 else tryAgain "illegal move"
-        (Nothing, _, _) -> tryAgain "invalid input on first coordinate"
-        (_, Nothing, _) -> tryAgain "invalid input on second coordinate"
-    --(_, _, Nothing) -> tryAgain "invalid input on number"
-    _ -> tryAgain "invalid input"
-
-hint :: Board -> IO Board
-hint b = do
-  input <- getLine
-  let tryAgain msg = putStrLn msg >> hint b
-  case input of
-    [cx, ' ', cy, ' '] ->
+        (Nothing, _, _) -> tryAgain "Invalid input on first coordinate. Must be a number 1..9"
+        (_, Nothing, _) -> tryAgain "Invalid input on second coordinate. Must be a number 1..9"
+        (_, _, Nothing) -> tryAgain "Invalid input on number. Must be a number 1..9"
+    [cx, ' ', cy] ->
       case (readCoord cx, readCoord cy) of
         (Just cx', Just cy') ->
           let i = (cx', cy')
            in if emptyAt b i
                 then -- then return $ write i readNum (cell tSolvedBoard i) b --(One) b
-                  return $ write2 i (cell tSolvedBoard i) b --TODO: in this example the num that is passed in is not the user num but the enum form the solution board
-                else tryAgain "illegal move"
-        (Nothing, _) -> tryAgain "invalid input on first coordinate"
-        (_, Nothing) -> tryAgain "invalid input on second coordinate"
-    _ -> tryAgain "invalid input"
+                  return $ write2 i (cell tSolvedBoard i) b --TODO: take in passed in solution board
+                else tryAgain "There is already a number at this coordinate"
+        (Nothing, _) -> tryAgain "Invalid input on first coordinate. Must be a number 1..9"
+        (_, Nothing) -> tryAgain "Invalid input on second coordinate. Must be a number 1..9"
+    _ -> tryAgain "Invalid input. To play: coord(1..9) coord(1..9) number(1..9) || For help: coord(1..9) coord(1..9)"
 
---TODO: add logical comparison to let the user select hint or enter a number
 play :: Board -> IO ()
 play b = do
   print b
   if gameInProgress b
     then do
-      putStrLn "Enter rowNum colNum sudokuNum or ask for help:"
-      --FIXME: this is the code for playing the game
-      -- b' <- playerAct b
-      b' <- hint b --FIXME: used for testing
+      putStrLn "To play: coord(1..9) coord(1..9) number(1..9) || For help: coord(1..9) coord(1..9): "
+      b' <- playerAct b
       putStrLn ""
       if gameInProgress b' then play b' else solve b'
     else solve b
