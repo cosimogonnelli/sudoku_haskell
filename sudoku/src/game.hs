@@ -78,7 +78,7 @@ newtype Board = Board {cell :: Index -> Cell}
 
 instance Show Board where
   show b =
-    unlines (map (concat . intersperse " " . map (show . cell b)) boardRows)
+    unlines (map (unwords . map (show . cell b)) boardRows)
 
 -- Board used for testing purpose
 test :: Index -> Cell
@@ -341,9 +341,9 @@ solve b
 emptyAt :: Board -> Index -> Bool
 emptyAt b i = cell b i == Empty
 
-write2 :: Index -> Cell -> Board -> Board
-write2 i x b =
-  Board $ \i' -> if (i == i' && emptyAt b i) then x else cell b i'
+write :: Index -> Cell -> Board -> Board
+write i x b =
+  Board $ \i' -> if i == i' && emptyAt b i then x else cell b i'
 
 -- I/O Player Code
 readCoord :: Char -> Maybe Coordinate
@@ -370,17 +370,17 @@ readNum '8' = Just (Mark Eight)
 readNum '9' = Just (Mark Nine)
 readNum _ = Nothing
 
-playerAct :: Board -> IO Board
-playerAct b = do
+playerAct :: Board -> Board -> IO Board
+playerAct b sb = do
   input <- getLine
-  let tryAgain msg = putStrLn msg >> playerAct b
+  let tryAgain msg = putStrLn msg >> playerAct b sb
   case input of
     [cx, ' ', cy, ' ', number] ->
       case (readCoord cx, readCoord cy, readNum number) of
         (Just cx', Just cy', Just number') ->
           let i = (cx', cy')
            in if emptyAt b i
-                then return $ write2 i number' b
+                then return $ write i number' b
                 else tryAgain "illegal move"
         (Nothing, _, _) -> tryAgain "Invalid input on first coordinate. Must be a number 1..9"
         (_, Nothing, _) -> tryAgain "Invalid input on second coordinate. Must be a number 1..9"
@@ -391,19 +391,19 @@ playerAct b = do
           let i = (cx', cy')
            in if emptyAt b i
                 then -- then return $ write i readNum (cell tSolvedBoard i) b --(One) b
-                  return $ write2 i (cell tSolvedBoard i) b --TODO: take in passed in solution board
+                  return $ write i (cell sb i) b
                 else tryAgain "There is already a number at this coordinate"
         (Nothing, _) -> tryAgain "Invalid input on first coordinate. Must be a number 1..9"
-        (_, Nothing) -> tryAgain "Invalid input on second coordinate. Must be a number 1..9"
+        (_, Nothing) -> tryAgain "Invalid input on second coordinate. Must be a number 1..9"     
     _ -> tryAgain "Invalid input. To play: coord(1..9) coord(1..9) number(1..9) || For help: coord(1..9) coord(1..9)"
 
-play :: Board -> IO ()
-play b = do
+play :: Board -> Board -> IO ()
+play b sb = do
   print b
   if gameInProgress b
     then do
       putStrLn "To play: coord(1..9) coord(1..9) number(1..9) || For help: coord(1..9) coord(1..9): "
-      b' <- playerAct b
+      b' <- playerAct b sb
       putStrLn ""
-      if gameInProgress b' then play b' else solve b'
+      if gameInProgress b' then play b' sb else solve b'
     else solve b
