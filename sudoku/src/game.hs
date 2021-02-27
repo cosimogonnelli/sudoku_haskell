@@ -363,17 +363,18 @@ readCoord '8' = Just C7
 readCoord '9' = Just C8
 readCoord _ = Nothing
 
-readNum :: Char -> Maybe Player
-readNum '1' = Just One
-readNum '2' = Just Two
-readNum '3' = Just Three
-readNum '4' = Just Four
-readNum '5' = Just Five
-readNum '6' = Just Six
-readNum '7' = Just Seven
-readNum '8' = Just Eight
-readNum '9' = Just Nine
-readNum _ = Nothing
+readNum :: Char -> Cell
+readNum '1' = Mark One
+readNum '2' = Mark Two
+readNum '3' = Mark Three
+readNum '4' = Mark Four
+readNum '5' = Mark Five
+readNum '6' = Mark Six
+readNum '7' = Mark Seven
+readNum '8' = Mark Eight
+readNum '9' = Mark Nine
+
+-- readNum _ = Nothing
 
 playerAct :: Board -> IO Board
 playerAct b = do
@@ -382,14 +383,14 @@ playerAct b = do
   case input of
     [cx, ' ', cy, ' ', number] ->
       case (readCoord cx, readCoord cy, readNum number) of
-        (Just cx', Just cy', Just number') ->
+        (Just cx', Just cy', number') ->
           let i = (cx', cy')
            in if emptyAt b i
-                then return $ write i number' b
+                then return $ write2 i number' b
                 else tryAgain "illegal move"
         (Nothing, _, _) -> tryAgain "invalid input on first coordinate"
         (_, Nothing, _) -> tryAgain "invalid input on second coordinate"
-        (_, _, Nothing) -> tryAgain "invalid input on number"
+    --(_, _, Nothing) -> tryAgain "invalid input on number"
     _ -> tryAgain "invalid input"
 
 hint :: Board -> IO Board
