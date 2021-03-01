@@ -302,11 +302,9 @@ checkBlockForAll b xb yb = and [checkBlock b n xb yb | n <- numbers]
 checkAllBlocks :: Board -> Bool
 checkAllBlocks b = and [checkBlockForAll b bx by | bx <- coBlocks, by <- coBlocks]
 
-boardIsFull :: Board -> Bool
-boardIsFull b = Empty `notElem` [cell b (cx, cy) | cx <- concat coBlocks, cy <- concat coBlocks]
-
+-- Check is a board is not full
 gameInProgress :: Board -> Bool
-gameInProgress b = not (boardIsFull b)
+gameInProgress b = Empty `elem` [cell b (cx, cy) | cx <- concat coBlocks, cy <- concat coBlocks]
 
 -- Return true if every row, column and block have numbers from 1 to 9
 solve :: Board -> IO ()
