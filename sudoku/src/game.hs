@@ -380,8 +380,10 @@ playerAct b sb = do
         (Just cx', Just cy', Just number') ->
           let i = (cx', cy')
            in if emptyAt b i
+              then if number' == cell sb i
                 then return $ write i number' b
-                else tryAgain "illegal move"
+              else tryAgain "That number doesn't belong at that coordinate. You lose a point."
+            else tryAgain "There is already a number at this coordinate."
         (Nothing, _, _) -> tryAgain "Invalid input on first coordinate. Must be a number 1..9"
         (_, Nothing, _) -> tryAgain "Invalid input on second coordinate. Must be a number 1..9"
         (_, _, Nothing) -> tryAgain "Invalid input on number. Must be a number 1..9"
@@ -390,9 +392,8 @@ playerAct b sb = do
         (Just cx', Just cy') ->
           let i = (cx', cy')
            in if emptyAt b i
-                then -- then return $ write i readNum (cell tSolvedBoard i) b --(One) b
-                  return $ write i (cell sb i) b
-                else tryAgain "There is already a number at this coordinate"
+                then return $ write i (cell sb i) b
+                else tryAgain "There is already a number at this coordinate."
         (Nothing, _) -> tryAgain "Invalid input on first coordinate. Must be a number 1..9"
         (_, Nothing) -> tryAgain "Invalid input on second coordinate. Must be a number 1..9"     
     _ -> tryAgain "Invalid input. To play: coord(1..9) coord(1..9) number(1..9) || For help: coord(1..9) coord(1..9)"
