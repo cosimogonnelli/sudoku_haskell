@@ -1,6 +1,6 @@
 module Game where
 
-import Data.List (intersperse)
+import Data.List ()
 import Data.Ord ()
 import GHC.Generics ()
 
@@ -327,14 +327,14 @@ checkAllBlocks b =
 boardIsFull :: Board -> Bool
 boardIsFull b = Empty `notElem` [cell b (cx, cy) | cx <- coordinates, cy <- coordinates]
 
-gameInProgress :: Board -> Bool
-gameInProgress b = not (boardIsFull b)
+gameInProgress :: Int -> Board -> Bool
+gameInProgress h b = not (boardIsFull b) && h > 0
 
 -- Return true if every row, column and block have numbers from 1 to 9
 solve :: Board -> IO ()
 solve b
   | won = putStrLn "You Won! :)"
-  | not won = putStrLn "You lose! :("
+  | not won = putStrLn "Oh no! You lost all your cookies so you lose. :( Play again and you can have some more!"
   where
     won = checkAllRows b && checkAllColumns b && checkAllBlocks b
 
@@ -370,10 +370,10 @@ readNum '8' = Just (Mark Eight)
 readNum '9' = Just (Mark Nine)
 readNum _ = Nothing
 
-playerAct :: Board -> Board -> IO Board
-playerAct b sb = do
+playerAct :: Int -> Board -> Board -> IO (Board, Int)
+playerAct h b sb = do
   input <- getLine
-  let tryAgain msg = putStrLn msg >> playerAct b sb
+  let tryAgain msg = putStrLn msg >> playerAct h b sb
   case input of
     [cx, ' ', cy, ' ', number] ->
       case (readCoord cx, readCoord cy, readNum number) of
@@ -381,8 +381,8 @@ playerAct b sb = do
           let i = (cx', cy')
            in if emptyAt b i
               then if number' == cell sb i
-                then return $ write i number' b
-              else tryAgain "That number doesn't belong at that coordinate. You lose a point."
+                then return (write i number' b, h)
+              else putStrLn "That number doesn't belong at that coordinate. You lose a cookie :(" >> return (b, h - 1)
             else tryAgain "There is already a number at this coordinate."
         (Nothing, _, _) -> tryAgain "Invalid input on first coordinate. Must be a number 1..9"
         (_, Nothing, _) -> tryAgain "Invalid input on second coordinate. Must be a number 1..9"
@@ -392,19 +392,21 @@ playerAct b sb = do
         (Just cx', Just cy') ->
           let i = (cx', cy')
            in if emptyAt b i
-                then return $ write i (cell sb i) b
+                then return (write i (cell sb i) b, h)
                 else tryAgain "There is already a number at this coordinate."
         (Nothing, _) -> tryAgain "Invalid input on first coordinate. Must be a number 1..9"
         (_, Nothing) -> tryAgain "Invalid input on second coordinate. Must be a number 1..9"     
     _ -> tryAgain "Invalid input. To play: coord(1..9) coord(1..9) number(1..9) || For help: coord(1..9) coord(1..9)"
+ 
 
-play :: Board -> Board -> IO ()
-play b sb = do
+play :: Int -> Board -> Board -> IO ()
+play h b sb = do
   print b
-  if gameInProgress b
+  putStrLn $ unwords(replicate h "🍪")
+  if gameInProgress h b
     then do
-      putStrLn "To play: coord(1..9) coord(1..9) number(1..9) || For help: coord(1..9) coord(1..9): "
-      b' <- playerAct b sb
+      putStrLn "To play: coord(1..9) coord(1..9) number(1..9) || For help: coord(1..9) coord(1..9) || To quit: ctrl-c: "
+      (b', h') <- playerAct h b sb 
       putStrLn ""
-      if gameInProgress b' then play b' sb else solve b'
+      if gameInProgress h' b' then play h' b' sb else solve b'
     else solve b
