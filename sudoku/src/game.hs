@@ -30,9 +30,6 @@ numbers = [One, Two, Three, Four, Five, Six, Seven, Eight, Nine]
 rowIndices :: Coordinate -> [Index]
 rowIndices cy = [(cy, y) | y <- concat coBlocks]
 
--- columnIndices :: Coordinate -> [Index]
--- columnIndices cx = [(cx, x) | x <- coordinates]
-
 -- List of lists of rows by index
 boardRows :: [[Index]]
 boardRows = [rowIndices c | c <- concat coBlocks]
@@ -69,101 +66,7 @@ instance Show Board where
   show b =
     unlines (map (unwords . map (show . cell b)) boardRows)
 
--- Board used for testing purpose
-test :: Index -> Cell
-test (x, y) =
-  case (x, y) of
-    -- Block 1
-    (C0, C0) -> Mark Five
-    (C0, C1) -> Mark Three
-    (C0, C2) -> Empty
-    (C1, C0) -> Mark Six
-    (C1, C1) -> Empty
-    (C1, C2) -> Empty
-    (C2, C0) -> Empty
-    (C2, C1) -> Mark Nine
-    (C2, C2) -> Mark Eight
-    -- Block 2
-    (C0, C3) -> Empty
-    (C0, C4) -> Mark Seven
-    (C0, C5) -> Empty
-    (C1, C3) -> Mark One
-    (C1, C4) -> Mark Nine
-    (C1, C5) -> Mark Five
-    (C2, C3) -> Empty
-    (C2, C4) -> Empty
-    (C2, C5) -> Empty
-    -- Block 3
-    (C0, C6) -> Empty
-    (C0, C7) -> Empty
-    (C0, C8) -> Empty
-    (C1, C6) -> Empty
-    (C1, C7) -> Empty
-    (C1, C8) -> Empty
-    (C2, C6) -> Empty
-    (C2, C7) -> Mark Six
-    (C2, C8) -> Empty
-    -- Block 4
-    (C3, C0) -> Mark Eight
-    (C3, C1) -> Empty
-    (C3, C2) -> Empty
-    (C4, C0) -> Mark Four
-    (C4, C1) -> Empty
-    (C4, C2) -> Empty
-    (C5, C0) -> Mark Seven
-    (C5, C1) -> Empty
-    (C5, C2) -> Empty
-    -- Block 5
-    (C3, C3) -> Empty
-    (C3, C4) -> Mark Six
-    (C3, C5) -> Empty
-    (C4, C3) -> Mark Eight
-    (C4, C4) -> Empty
-    (C4, C5) -> Mark Three
-    (C5, C3) -> Empty
-    (C5, C4) -> Mark Two
-    (C5, C5) -> Empty
-    -- Block 6
-    (C3, C6) -> Empty
-    (C3, C7) -> Empty
-    (C3, C8) -> Mark Three
-    (C4, C6) -> Empty
-    (C4, C7) -> Empty
-    (C4, C8) -> Mark One
-    (C5, C6) -> Empty
-    (C5, C7) -> Empty
-    (C5, C8) -> Mark Six
-    -- Block 7
-    (C6, C0) -> Empty
-    (C6, C1) -> Mark Six
-    (C6, C2) -> Empty
-    (C7, C0) -> Empty
-    (C7, C1) -> Empty
-    (C7, C2) -> Empty
-    (C8, C0) -> Empty
-    (C8, C1) -> Empty
-    (C8, C2) -> Empty
-    -- Block 8
-    (C6, C3) -> Empty
-    (C6, C4) -> Empty
-    (C6, C5) -> Empty
-    (C7, C3) -> Mark Four
-    (C7, C4) -> Mark One
-    (C7, C5) -> Mark Nine
-    (C8, C3) -> Empty
-    (C8, C4) -> Mark Eight
-    (C8, C5) -> Empty
-    -- Block 9
-    (C6, C6) -> Mark Two
-    (C6, C7) -> Mark Eight
-    (C6, C8) -> Empty
-    (C7, C6) -> Empty
-    (C7, C7) -> Empty
-    (C7, C8) -> Mark Five
-    (C8, C6) -> Empty
-    (C8, C7) -> Mark Seven
-    (C8, C8) -> Mark Nine
-
+--TODO: board left only for testing checking solution to be REMOVED
 testSolved :: Index -> Cell
 testSolved (x, y) =
   case (x, y) of
@@ -258,107 +161,12 @@ testSolved (x, y) =
     (C8, C7) -> Mark Seven
     (C8, C8) -> Mark Nine
 
-emptyBoard :: Index -> Cell
-emptyBoard (x, y) =
-  case (x, y) of
-    -- Block 1
-    (C0, C0) -> Empty
-    (C0, C1) -> Empty
-    (C0, C2) -> Empty
-    (C1, C0) -> Empty
-    (C1, C1) -> Empty
-    (C1, C2) -> Empty
-    (C2, C0) -> Empty
-    (C2, C1) -> Empty
-    (C2, C2) -> Empty
-    -- Block 2
-    (C0, C3) -> Empty
-    (C0, C4) -> Empty
-    (C0, C5) -> Empty
-    (C1, C3) -> Empty
-    (C1, C4) -> Empty
-    (C1, C5) -> Empty
-    (C2, C3) -> Empty
-    (C2, C4) -> Empty
-    (C2, C5) -> Empty
-    -- Block 3
-    (C0, C6) -> Empty
-    (C0, C7) -> Empty
-    (C0, C8) -> Empty
-    (C1, C6) -> Empty
-    (C1, C7) -> Empty
-    (C1, C8) -> Empty
-    (C2, C6) -> Empty
-    (C2, C7) -> Empty
-    (C2, C8) -> Empty
-    -- Block 4
-    (C3, C0) -> Empty
-    (C3, C1) -> Empty
-    (C3, C2) -> Empty
-    (C4, C0) -> Empty
-    (C4, C1) -> Empty
-    (C4, C2) -> Empty
-    (C5, C0) -> Empty
-    (C5, C1) -> Empty
-    (C5, C2) -> Empty
-    -- Block 5
-    (C3, C3) -> Empty
-    (C3, C4) -> Empty
-    (C3, C5) -> Empty
-    (C4, C3) -> Empty
-    (C4, C4) -> Empty
-    (C4, C5) -> Empty
-    (C5, C3) -> Empty
-    (C5, C4) -> Empty
-    (C5, C5) -> Empty
-    -- Block 6
-    (C3, C6) -> Empty
-    (C3, C7) -> Empty
-    (C3, C8) -> Empty
-    (C4, C6) -> Empty
-    (C4, C7) -> Empty
-    (C4, C8) -> Empty
-    (C5, C6) -> Empty
-    (C5, C7) -> Empty
-    (C5, C8) -> Empty
-    -- Block 7
-    (C6, C0) -> Empty
-    (C6, C1) -> Empty
-    (C6, C2) -> Empty
-    (C7, C0) -> Empty
-    (C7, C1) -> Empty
-    (C7, C2) -> Empty
-    (C8, C0) -> Empty
-    (C8, C1) -> Empty
-    (C8, C2) -> Empty
-    -- Block 8
-    (C6, C3) -> Empty
-    (C6, C4) -> Empty
-    (C6, C5) -> Empty
-    (C7, C3) -> Empty
-    (C7, C4) -> Empty
-    (C7, C5) -> Empty
-    (C8, C3) -> Empty
-    (C8, C4) -> Empty
-    (C8, C5) -> Empty
-    -- Block 9
-    (C6, C6) -> Empty
-    (C6, C7) -> Empty
-    (C6, C8) -> Empty
-    (C7, C6) -> Empty
-    (C7, C7) -> Empty
-    (C7, C8) -> Empty
-    (C8, C6) -> Empty
-    (C8, C7) -> Empty
-    (C8, C8) -> Empty
-
--- Print test
-tBoard :: Board
-tBoard = Board test
-
--- Print solved
+-- TODO: to be REMOVED
 tSolvedBoard :: Board
 tSolvedBoard = Board testSolved
+
+emptyBoard :: Index -> Cell
+emptyBoard (x, y) = Empty
 
 eBoard :: Board
 eBoard = Board emptyBoard
@@ -465,10 +273,11 @@ playerAct cookies b sb = do
         (Just cx', Just cy', Just number') ->
           let i = (cx', cy')
            in if emptyAt b i
-              then if number' == cell sb i
-                then return (write i number' b, cookies)
-              else putStrLn "That number doesn't belong at that coordinate. You lose a cookie :(" >> return (b, cookies - 1)
-            else putStrLn "There is already a number at this coordinate." >> return (b, cookies)
+                then
+                  if number' == cell sb i
+                    then return (write i number' b, cookies)
+                    else putStrLn "That number doesn't belong at that coordinate. You lose a cookie :(" >> return (b, cookies - 1)
+                else putStrLn "There is already a number at this coordinate." >> return (b, cookies)
         (Nothing, _, _) -> tryAgain "Invalid input on first coordinate for row. Must be a number 1..9"
         (_, Nothing, _) -> tryAgain "Invalid input on second coordinate for column. Must be a number 1..9"
         (_, _, Nothing) -> tryAgain "Invalid input on number. Must be a number 1..9"
@@ -478,20 +287,25 @@ playerAct cookies b sb = do
           let i = (cx', cy')
            in if emptyAt b i
                 then return (write i (cell sb i) b, cookies)
-              else putStrLn "There is already a number at this coordinate." >> return (b, cookies)
+                else putStrLn "There is already a number at this coordinate." >> return (b, cookies)
         (Nothing, _) -> tryAgain "Invalid input on first coordinate for row. Must be a number 1..9"
-        (_, Nothing) -> tryAgain "Invalid input on second coordinate for column. Must be a number 1..9"     
+        (_, Nothing) -> tryAgain "Invalid input on second coordinate for column. Must be a number 1..9"
     _ -> tryAgain "Invalid input. To play: row(1..9) column(1..9) number(1..9) || For help: row(1..9) column(1..9)"
- 
+
 -- parameter b is player's board, parameter sb is the solution board
 play :: Int -> Board -> Board -> IO ()
 play cookies b sb = do
   print b
-  putStrLn $ unwords(replicate cookies "🍪")
+  putStrLn $ unwords (replicate cookies "🍪")
   if gameInProgress cookies b
     then do
       putStrLn "To play: row(1..9) column(1..9) number(1..9) || For help: row(1..9) column(1..9) || To quit: ctrl-c: "
-      (b', cookies') <- playerAct cookies b sb 
+      (b', cookies') <- playerAct cookies b sb
       putStrLn ""
       if gameInProgress cookies' b' then play cookies' b' sb else solve b'
     else solve b
+
+-- Read in a board
+fillBoard :: [Index] -> [Cell] -> Board -> Board
+fillBoard [] [] b = b
+fillBoard (x : xs) (y : ys) b = fillBoard xs ys (write x y b)
