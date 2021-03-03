@@ -1,6 +1,8 @@
 module Main where
 
+import Data.List
 import Game
+import System.IO
 
 main :: IO ()
 main = do
@@ -14,3 +16,4 @@ main = do
   putStrLn "Control-C at any time to quit.\n"
   putStrLn "Starting board (size: 9x9)"
   play 9 tBoard tSolvedBoard 
+

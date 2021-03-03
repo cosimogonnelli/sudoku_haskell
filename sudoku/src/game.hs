@@ -5,16 +5,11 @@ import Data.Ord ()
 import GHC.Generics ()
 
 -- The board is composed by 9x9 cells.
--- Each cells can be defined with an index type.
+-- Each cells can be defined with an index type of coordinates
 data Coordinate = C0 | C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8
   deriving (Eq, Ord, Show)
 
--- The index is a tuple of coordinates
 type Index = (Coordinate, Coordinate)
-
--- List of all coordinates
-coordinates :: [Coordinate]
-coordinates = [C0, C1, C2, C3, C4, C5, C6, C7, C8]
 
 -- List of coordinate Blocks.
 -- These are used to check each block solution
@@ -23,14 +18,8 @@ coordinates = [C0, C1, C2, C3, C4, C5, C6, C7, C8]
 -- 1       1 2 3
 -- 2       4 5 6
 -- 3       7 8 9
-coBlock1 :: [Coordinate]
-coBlock1 = [C0, C1, C2]
-
-coBlock2 :: [Coordinate]
-coBlock2 = [C3, C4, C5]
-
-coBlock3 :: [Coordinate]
-coBlock3 = [C6, C7, C8]
+coBlocks :: [[Coordinate]]
+coBlocks = [[C0, C1, C2], [C3, C4, C5], [C6, C7, C8]]
 
 -- List of all possible number options
 numbers :: [Player]
@@ -39,14 +28,14 @@ numbers = [One, Two, Three, Four, Five, Six, Seven, Eight, Nine]
 -- To check the game we need a list of rows and columns since for each row
 -- or columns we need to have numbers from 1 to 9 in order to have a valid board
 rowIndices :: Coordinate -> [Index]
-rowIndices cy = [(cy, y) | y <- coordinates]
+rowIndices cy = [(cy, y) | y <- concat coBlocks]
 
-columnIndices :: Coordinate -> [Index]
-columnIndices cx = [(cx, x) | x <- coordinates]
+-- columnIndices :: Coordinate -> [Index]
+-- columnIndices cx = [(cx, x) | x <- coordinates]
 
 -- List of lists of rows by index
 boardRows :: [[Index]]
-boardRows = [rowIndices c | c <- coordinates]
+boardRows = [rowIndices c | c <- concat coBlocks]
 
 -- List of all board indices
 allIndices :: [Index]
@@ -269,6 +258,100 @@ testSolved (x, y) =
     (C8, C7) -> Mark Seven
     (C8, C8) -> Mark Nine
 
+emptyBoard :: Index -> Cell
+emptyBoard (x, y) =
+  case (x, y) of
+    -- Block 1
+    (C0, C0) -> Empty
+    (C0, C1) -> Empty
+    (C0, C2) -> Empty
+    (C1, C0) -> Empty
+    (C1, C1) -> Empty
+    (C1, C2) -> Empty
+    (C2, C0) -> Empty
+    (C2, C1) -> Empty
+    (C2, C2) -> Empty
+    -- Block 2
+    (C0, C3) -> Empty
+    (C0, C4) -> Empty
+    (C0, C5) -> Empty
+    (C1, C3) -> Empty
+    (C1, C4) -> Empty
+    (C1, C5) -> Empty
+    (C2, C3) -> Empty
+    (C2, C4) -> Empty
+    (C2, C5) -> Empty
+    -- Block 3
+    (C0, C6) -> Empty
+    (C0, C7) -> Empty
+    (C0, C8) -> Empty
+    (C1, C6) -> Empty
+    (C1, C7) -> Empty
+    (C1, C8) -> Empty
+    (C2, C6) -> Empty
+    (C2, C7) -> Empty
+    (C2, C8) -> Empty
+    -- Block 4
+    (C3, C0) -> Empty
+    (C3, C1) -> Empty
+    (C3, C2) -> Empty
+    (C4, C0) -> Empty
+    (C4, C1) -> Empty
+    (C4, C2) -> Empty
+    (C5, C0) -> Empty
+    (C5, C1) -> Empty
+    (C5, C2) -> Empty
+    -- Block 5
+    (C3, C3) -> Empty
+    (C3, C4) -> Empty
+    (C3, C5) -> Empty
+    (C4, C3) -> Empty
+    (C4, C4) -> Empty
+    (C4, C5) -> Empty
+    (C5, C3) -> Empty
+    (C5, C4) -> Empty
+    (C5, C5) -> Empty
+    -- Block 6
+    (C3, C6) -> Empty
+    (C3, C7) -> Empty
+    (C3, C8) -> Empty
+    (C4, C6) -> Empty
+    (C4, C7) -> Empty
+    (C4, C8) -> Empty
+    (C5, C6) -> Empty
+    (C5, C7) -> Empty
+    (C5, C8) -> Empty
+    -- Block 7
+    (C6, C0) -> Empty
+    (C6, C1) -> Empty
+    (C6, C2) -> Empty
+    (C7, C0) -> Empty
+    (C7, C1) -> Empty
+    (C7, C2) -> Empty
+    (C8, C0) -> Empty
+    (C8, C1) -> Empty
+    (C8, C2) -> Empty
+    -- Block 8
+    (C6, C3) -> Empty
+    (C6, C4) -> Empty
+    (C6, C5) -> Empty
+    (C7, C3) -> Empty
+    (C7, C4) -> Empty
+    (C7, C5) -> Empty
+    (C8, C3) -> Empty
+    (C8, C4) -> Empty
+    (C8, C5) -> Empty
+    -- Block 9
+    (C6, C6) -> Empty
+    (C6, C7) -> Empty
+    (C6, C8) -> Empty
+    (C7, C6) -> Empty
+    (C7, C7) -> Empty
+    (C7, C8) -> Empty
+    (C8, C6) -> Empty
+    (C8, C7) -> Empty
+    (C8, C8) -> Empty
+
 -- Print test
 tBoard :: Board
 tBoard = Board test
@@ -277,9 +360,12 @@ tBoard = Board test
 tSolvedBoard :: Board
 tSolvedBoard = Board testSolved
 
+eBoard :: Board
+eBoard = Board emptyBoard
+
 -- Check if a number is in a row
 checkRow :: Board -> Player -> Coordinate -> Bool
-checkRow b p cx = Mark p `elem` [cell b (cx, y) | y <- coordinates]
+checkRow b p cx = Mark p `elem` [cell b (cx, y) | y <- concat coBlocks]
 
 -- Check if all 9 numbers are in a row
 checkRowForAll :: Board -> Coordinate -> Bool
@@ -287,11 +373,11 @@ checkRowForAll b cx = and [checkRow b n cx | n <- numbers]
 
 -- Check if every row have all 9 numbers
 checkAllRows :: Board -> Bool
-checkAllRows b = and [checkRowForAll b cx | cx <- coordinates]
+checkAllRows b = and [checkRowForAll b cx | cx <- concat coBlocks]
 
 -- Check if a number is in a Column
 checkColumn :: Board -> Player -> Coordinate -> Bool
-checkColumn b p cy = Mark p `elem` [cell b (x, cy) | x <- coordinates]
+checkColumn b p cy = Mark p `elem` [cell b (x, cy) | x <- concat coBlocks]
 
 -- Check if all 9 numbers are in a column
 checkColumnForAll :: Board -> Coordinate -> Bool
@@ -299,7 +385,7 @@ checkColumnForAll b cy = and [checkColumn b n cy | n <- numbers]
 
 -- Check if every column have all 9 numbers
 checkAllColumns :: Board -> Bool
-checkAllColumns b = and [checkColumnForAll b cy | cy <- coordinates]
+checkAllColumns b = and [checkColumnForAll b cy | cy <- concat coBlocks]
 
 -- Check if a number is in a block
 checkBlock :: Board -> Player -> [Coordinate] -> [Coordinate] -> Bool
@@ -311,24 +397,11 @@ checkBlockForAll b xb yb = and [checkBlock b n xb yb | n <- numbers]
 
 -- Check if every Block have all 9 numbers
 checkAllBlocks :: Board -> Bool
-checkAllBlocks b =
-  checkBlockForAll b coBlock1 coBlock1
-    && checkBlockForAll b coBlock1 coBlock2
-    && checkBlockForAll b coBlock1 coBlock3
-    && checkBlockForAll b coBlock2 coBlock1
-    && checkBlockForAll b coBlock2 coBlock2
-    && checkBlockForAll b coBlock2 coBlock3
-    && checkBlockForAll b coBlock3 coBlock1
-    && checkBlockForAll b coBlock3 coBlock2
-    && checkBlockForAll b coBlock3 coBlock3
+checkAllBlocks b = and [checkBlockForAll b bx by | bx <- coBlocks, by <- coBlocks]
 
--- make a list of [block1, 2 3] then do a permutaion in a list comp then use all
-
-boardIsFull :: Board -> Bool
-boardIsFull b = Empty `notElem` [cell b (cx, cy) | cx <- coordinates, cy <- coordinates]
-
+-- Check is a board is not full
 gameInProgress :: Int -> Board -> Bool
-gameInProgress h b = not (boardIsFull b) && h > 0
+gameInProgress cookies b = Empty `elem` [cell b (cx, cy) | cx <- concat coBlocks, cy <- concat coBlocks] && cookies > 0
 
 -- Return true if every row, column and block have numbers from 1 to 9
 solve :: Board -> IO ()
@@ -357,6 +430,18 @@ readCoord '7' = Just C6
 readCoord '8' = Just C7
 readCoord '9' = Just C8
 readCoord _ = Nothing
+
+readN :: String -> Cell
+readN "1" = Mark One
+readN "2" = Mark Two
+readN "3" = Mark Three
+readN "4" = Mark Four
+readN "5" = Mark Five
+readN "6" = Mark Six
+readN "7" = Mark Seven
+readN "8" = Mark Eight
+readN "9" = Mark Nine
+readN "0" = Empty
 
 readNum :: Char -> Maybe Cell
 readNum '1' = Just (Mark One)
