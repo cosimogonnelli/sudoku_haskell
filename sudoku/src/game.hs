@@ -1,6 +1,6 @@
 module Game where
 
-import Data.List (intersperse)
+import Data.List ()
 import Data.Ord ()
 import GHC.Generics ()
 
@@ -67,7 +67,7 @@ newtype Board = Board {cell :: Index -> Cell}
 
 instance Show Board where
   show b =
-    unlines (map (concat . intersperse " " . map (show . cell b)) boardRows)
+    unlines (map (unwords . map (show . cell b)) boardRows)
 
 -- Board used for testing purpose
 test :: Index -> Cell
@@ -400,28 +400,23 @@ checkAllBlocks :: Board -> Bool
 checkAllBlocks b = and [checkBlockForAll b bx by | bx <- coBlocks, by <- coBlocks]
 
 -- Check is a board is not full
-gameInProgress :: Board -> Bool
-gameInProgress b = Empty `elem` [cell b (cx, cy) | cx <- concat coBlocks, cy <- concat coBlocks]
+gameInProgress :: Int -> Board -> Bool
+gameInProgress cookies b = Empty `elem` [cell b (cx, cy) | cx <- concat coBlocks, cy <- concat coBlocks] && cookies > 0
 
 -- Return true if every row, column and block have numbers from 1 to 9
 solve :: Board -> IO ()
 solve b
   | won = putStrLn "You Won! :)"
-  | not won = putStrLn "You lose! :("
+  | not won = putStrLn "Oh no! You lost all your cookies so you lose. :( Play again and you can have some more!"
   where
     won = checkAllRows b && checkAllColumns b && checkAllBlocks b
 
 emptyAt :: Board -> Index -> Bool
 emptyAt b i = cell b i == Empty
 
-write :: Index -> Player -> Board -> Board
+write :: Index -> Cell -> Board -> Board
 write i x b =
-  Board $ \i' -> if (i == i' && emptyAt b i) then Mark x else cell b i'
-
--- TODO: we can use this to write to the board the number from the user and the solution board. We will be able to delete the function above prabably
-write2 :: Index -> Cell -> Board -> Board
-write2 i x b =
-  Board $ \i' -> if (i == i' && emptyAt b i) then x else cell b i'
+  Board $ \i' -> if i == i' && emptyAt b i then x else cell b i'
 
 -- I/O Player Code
 readCoord :: Char -> Maybe Coordinate
@@ -436,17 +431,6 @@ readCoord '8' = Just C7
 readCoord '9' = Just C8
 readCoord _ = Nothing
 
-readNum :: Char -> Cell
-readNum '1' = Mark One
-readNum '2' = Mark Two
-readNum '3' = Mark Three
-readNum '4' = Mark Four
-readNum '5' = Mark Five
-readNum '6' = Mark Six
-readNum '7' = Mark Seven
-readNum '8' = Mark Eight
-readNum '9' = Mark Nine
-
 readN :: String -> Cell
 readN "1" = Mark One
 readN "2" = Mark Two
@@ -459,52 +443,55 @@ readN "8" = Mark Eight
 readN "9" = Mark Nine
 readN "0" = Empty
 
--- readNum _ = Nothing
+readNum :: Char -> Maybe Cell
+readNum '1' = Just (Mark One)
+readNum '2' = Just (Mark Two)
+readNum '3' = Just (Mark Three)
+readNum '4' = Just (Mark Four)
+readNum '5' = Just (Mark Five)
+readNum '6' = Just (Mark Six)
+readNum '7' = Just (Mark Seven)
+readNum '8' = Just (Mark Eight)
+readNum '9' = Just (Mark Nine)
+readNum _ = Nothing
 
-playerAct :: Board -> IO Board
-playerAct b = do
+playerAct :: Int -> Board -> Board -> IO (Board, Int)
+playerAct cookies b sb = do
   input <- getLine
-  let tryAgain msg = putStrLn msg >> playerAct b
+  let tryAgain msg = putStrLn msg >> playerAct cookies b sb
   case input of
     [cx, ' ', cy, ' ', number] ->
       case (readCoord cx, readCoord cy, readNum number) of
-        (Just cx', Just cy', number') ->
+        (Just cx', Just cy', Just number') ->
           let i = (cx', cy')
            in if emptyAt b i
-                then return $ write2 i number' b
-                else tryAgain "illegal move"
-        (Nothing, _, _) -> tryAgain "invalid input on first coordinate"
-        (_, Nothing, _) -> tryAgain "invalid input on second coordinate"
-    --(_, _, Nothing) -> tryAgain "invalid input on number"
-    _ -> tryAgain "invalid input"
-
-hint :: Board -> IO Board
-hint b = do
-  input <- getLine
-  let tryAgain msg = putStrLn msg >> hint b
-  case input of
-    [cx, ' ', cy, ' '] ->
+              then if number' == cell sb i
+                then return (write i number' b, cookies)
+              else putStrLn "That number doesn't belong at that coordinate. You lose a cookie :(" >> return (b, cookies - 1)
+            else putStrLn "There is already a number at this coordinate." >> return (b, cookies)
+        (Nothing, _, _) -> tryAgain "Invalid input on first coordinate for row. Must be a number 1..9"
+        (_, Nothing, _) -> tryAgain "Invalid input on second coordinate for column. Must be a number 1..9"
+        (_, _, Nothing) -> tryAgain "Invalid input on number. Must be a number 1..9"
+    [cx, ' ', cy] ->
       case (readCoord cx, readCoord cy) of
         (Just cx', Just cy') ->
           let i = (cx', cy')
            in if emptyAt b i
-                then -- then return $ write i readNum (cell tSolvedBoard i) b --(One) b
-                  return $ write2 i (cell tSolvedBoard i) b --TODO: in this example the num that is passed in is not the user num but the enum form the solution board
-                else tryAgain "illegal move"
-        (Nothing, _) -> tryAgain "invalid input on first coordinate"
-        (_, Nothing) -> tryAgain "invalid input on second coordinate"
-    _ -> tryAgain "invalid input"
-
---TODO: add logical comparison to let the user select hint or enter a number
-play :: Board -> IO ()
-play b = do
+                then return (write i (cell sb i) b, cookies)
+              else putStrLn "There is already a number at this coordinate." >> return (b, cookies)
+        (Nothing, _) -> tryAgain "Invalid input on first coordinate for row. Must be a number 1..9"
+        (_, Nothing) -> tryAgain "Invalid input on second coordinate for column. Must be a number 1..9"     
+    _ -> tryAgain "Invalid input. To play: row(1..9) column(1..9) number(1..9) || For help: row(1..9) column(1..9)"
+ 
+-- parameter b is player's board, parameter sb is the solution board
+play :: Int -> Board -> Board -> IO ()
+play cookies b sb = do
   print b
-  if gameInProgress b
+  putStrLn $ unwords(replicate cookies "🍪")
+  if gameInProgress cookies b
     then do
-      putStrLn "Enter rowNum colNum sudokuNum or ask for help:"
-      --FIXME: this is the code for playing the game
-      b' <- playerAct b
-      -- b' <- hint b --FIXME: used for testing
+      putStrLn "To play: row(1..9) column(1..9) number(1..9) || For help: row(1..9) column(1..9) || To quit: ctrl-c: "
+      (b', cookies') <- playerAct cookies b sb 
       putStrLn ""
-      if gameInProgress b' then play b' else solve b'
+      if gameInProgress cookies' b' then play cookies' b' sb else solve b'
     else solve b
