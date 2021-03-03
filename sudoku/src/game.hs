@@ -371,9 +371,9 @@ readNum '9' = Just (Mark Nine)
 readNum _ = Nothing
 
 playerAct :: Int -> Board -> Board -> IO (Board, Int)
-playerAct h b sb = do
+playerAct cookies b sb = do
   input <- getLine
-  let tryAgain msg = putStrLn msg >> playerAct h b sb
+  let tryAgain msg = putStrLn msg >> playerAct cookies b sb
   case input of
     [cx, ' ', cy, ' ', number] ->
       case (readCoord cx, readCoord cy, readNum number) of
@@ -381,32 +381,32 @@ playerAct h b sb = do
           let i = (cx', cy')
            in if emptyAt b i
               then if number' == cell sb i
-                then return (write i number' b, h)
-              else putStrLn "That number doesn't belong at that coordinate. You lose a cookie :(" >> return (b, h - 1)
-            else tryAgain "There is already a number at this coordinate."
-        (Nothing, _, _) -> tryAgain "Invalid input on first coordinate. Must be a number 1..9"
-        (_, Nothing, _) -> tryAgain "Invalid input on second coordinate. Must be a number 1..9"
+                then return (write i number' b, cookies)
+              else putStrLn "That number doesn't belong at that coordinate. You lose a cookie :(" >> return (b, cookies - 1)
+            else putStrLn "There is already a number at this coordinate." >> return (b, cookies)
+        (Nothing, _, _) -> tryAgain "Invalid input on first coordinate for row. Must be a number 1..9"
+        (_, Nothing, _) -> tryAgain "Invalid input on second coordinate for column. Must be a number 1..9"
         (_, _, Nothing) -> tryAgain "Invalid input on number. Must be a number 1..9"
     [cx, ' ', cy] ->
       case (readCoord cx, readCoord cy) of
         (Just cx', Just cy') ->
           let i = (cx', cy')
            in if emptyAt b i
-                then return (write i (cell sb i) b, h)
-                else tryAgain "There is already a number at this coordinate."
-        (Nothing, _) -> tryAgain "Invalid input on first coordinate. Must be a number 1..9"
-        (_, Nothing) -> tryAgain "Invalid input on second coordinate. Must be a number 1..9"     
-    _ -> tryAgain "Invalid input. To play: coord(1..9) coord(1..9) number(1..9) || For help: coord(1..9) coord(1..9)"
+                then return (write i (cell sb i) b, cookies)
+              else putStrLn "There is already a number at this coordinate." >> return (b, cookies)
+        (Nothing, _) -> tryAgain "Invalid input on first coordinate for row. Must be a number 1..9"
+        (_, Nothing) -> tryAgain "Invalid input on second coordinate for column. Must be a number 1..9"     
+    _ -> tryAgain "Invalid input. To play: row(1..9) column(1..9) number(1..9) || For help: row(1..9) column(1..9)"
  
-
+-- parameter b is player's board, parameter sb is the solution board
 play :: Int -> Board -> Board -> IO ()
-play h b sb = do
+play cookies b sb = do
   print b
-  putStrLn $ unwords(replicate h "🍪")
-  if gameInProgress h b
+  putStrLn $ unwords(replicate cookies "🍪")
+  if gameInProgress cookies b
     then do
-      putStrLn "To play: coord(1..9) coord(1..9) number(1..9) || For help: coord(1..9) coord(1..9) || To quit: ctrl-c: "
-      (b', h') <- playerAct h b sb 
+      putStrLn "To play: row(1..9) column(1..9) number(1..9) || For help: row(1..9) column(1..9) || To quit: ctrl-c: "
+      (b', cookies') <- playerAct cookies b sb 
       putStrLn ""
-      if gameInProgress h' b' then play h' b' sb else solve b'
+      if gameInProgress cookies' b' then play cookies' b' sb else solve b'
     else solve b
