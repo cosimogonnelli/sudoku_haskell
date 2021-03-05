@@ -24,7 +24,12 @@ main = do
   -- Play <cookies> <starting-board> <solved-board>
   play 9 (fillBoard allIndices (parser list1) eBoard) (fillBoard allIndices (parser list2) eBoard)
 
+-- Read in a board
+fillBoard :: [Index] -> [Cell] -> Board -> Board
+fillBoard [] [] b = b
+fillBoard (x : xs) (y : ys) b = fillBoard xs ys (write x y b)
+
 parser :: [String] -> [Cell]
 parser s =
-  let suNums = words [if n == ',' || n == '[' || n == ']' then ' ' else n | i <- s, n <- i]
-   in [readN n | n <- suNums]
+  let sNum = words [if n == ',' || n == '[' || n == ']' then ' ' else n | i <- s, n <- i]
+   in [readN n | n <- sNum]

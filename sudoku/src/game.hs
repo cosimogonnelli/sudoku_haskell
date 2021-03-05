@@ -197,15 +197,24 @@ checkAllColumns b = and [checkColumnForAll b cy | cy <- concat coBlocks]
 
 -- Check if a number is in a block
 checkBlock :: Board -> Player -> [Coordinate] -> [Coordinate] -> Bool
+-- checkBlock b p xb yb = Mark p `elem` [cell b (x, y) | x <- xb, y <- yb]
 checkBlock b p xb yb = Mark p `elem` [cell b (x, y) | x <- xb, y <- yb]
 
 -- Check if all 9 numbers are in a block
-checkBlockForAll :: Board -> [Coordinate] -> [Coordinate] -> Bool
-checkBlockForAll b xb yb = and [checkBlock b n xb yb | n <- numbers]
+--checkBlockForAll :: Board -> [Coordinate] -> [Coordinate] -> Bool
+-- checkBlockForAll b xb yb = and [checkBlock b n xb yb | n <- numbers]
+checkBlockForAll :: Board -> Bool
+-- checkBlockForAll b = and [checkBlock tSolvedBoard n bx by | n <- numbers, bx <- coBlocks, by <- coBlocks]
+
+checkBlockForAll b = and (Mark n `elem` [(cell tSolvedBoard bx by) | n <- numbers, bx <- coBlocks, by <- coBlocks])
+
+numTimesFound :: Ord a => a -> [a] -> Int
+numTimesFound _ [] = 0
+numTimesFound x xs = (length . filter (== x)) xs
 
 -- Check if every Block have all 9 numbers
-checkAllBlocks :: Board -> Bool
-checkAllBlocks b = and [checkBlockForAll b bx by | bx <- coBlocks, by <- coBlocks]
+-- checkAllBlocks :: Board -> Bool
+-- checkAllBlocks b = and [checkBlockForAll b bx by | bx <- coBlocks, by <- coBlocks]
 
 -- Check is a board is not full
 gameInProgress :: Int -> Board -> Bool
@@ -217,7 +226,7 @@ solve b
   | won = putStrLn "You Won! :)"
   | not won = putStrLn "Oh no! You lost all your cookies so you lose. :( Play again and you can have some more!"
   where
-    won = checkAllRows b && checkAllColumns b && checkAllBlocks b
+    won = checkAllRows b && checkAllColumns b && checkBlockForAll b --checkAllBlocks b
 
 emptyAt :: Board -> Index -> Bool
 emptyAt b i = cell b i == Empty
@@ -305,7 +314,8 @@ play cookies b sb = do
       if gameInProgress cookies' b' then play cookies' b' sb else solve b'
     else solve b
 
--- Read in a board
-fillBoard :: [Index] -> [Cell] -> Board -> Board
-fillBoard [] [] b = b
-fillBoard (x : xs) (y : ys) b = fillBoard xs ys (write x y b)
+chunks :: Int -> [a] -> [[a]]
+chunks _ [] = []
+chunks n xs =
+  let (ys, zs) = splitAt n xs
+   in ys : chunks n zs
