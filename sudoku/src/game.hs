@@ -11,15 +11,35 @@ data Coordinate = C0 | C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8
 
 type Index = (Coordinate, Coordinate)
 
+-- Separates a list into list of lists of a particular length
+chunks :: Int -> [a] -> [[a]]
+chunks _ [] = []
+chunks n xs =
+  let (ys, zs) = splitAt n xs
+   in ys : chunks n zs
+
 -- List of coordinate Blocks.
 -- These are used to check each block solution
--- A Board is represented as below
+-- A Block is represented as below
 -- coBlock 1 2 3
 -- 1       1 2 3
 -- 2       4 5 6
 -- 3       7 8 9
+coords :: [Coordinate]
+coords = [C0, C1, C2, C3, C4, C5, C6, C7, C8]
+
+-- [[C0, C1, C2], [C3, C4, C5], [C6, C7, C8]]
 coBlocks :: [[Coordinate]]
-coBlocks = [[C0, C1, C2], [C3, C4, C5], [C6, C7, C8]]
+coBlocks = chunks 3 coords
+
+blockIndices :: [[Index]]
+blockIndices = [(,) <$> coBlocks!!x <*> coBlocks!!y | x <- [0..2], y <- [0..2]]
+
+columnIndices :: [[Index]]
+columnIndices = chunks 9 [(y, x) | x <- coords, y <- coords]
+
+rowIndices :: [[Index]]
+rowIndices = chunks 9 [(x, y) | x <- coords, y <- coords]
 
 -- List of all possible number options
 numbers :: [Player]
@@ -27,16 +47,17 @@ numbers = [One, Two, Three, Four, Five, Six, Seven, Eight, Nine]
 
 -- To check the game we need a list of rows and columns since for each row
 -- or columns we need to have numbers from 1 to 9 in order to have a valid board
-rowIndices :: Coordinate -> [Index]
-rowIndices cy = [(cy, y) | y <- concat coBlocks]
+--rowIndices :: Coordinate -> [Index]
+--rowIndices cy = [(cy, y) | y <- concat coBlocks]
 
 -- List of lists of rows by index
-boardRows :: [[Index]]
-boardRows = [rowIndices c | c <- concat coBlocks]
+--boardRows :: [[Index]]
+--boardRows = [rowIndices c | c <- concat coBlocks]
 
 -- List of all board indices
+--allIndices = [(x, y) | x <- concat coBlocks, y <- concat coBlocks]
 allIndices :: [Index]
-allIndices = concat boardRows
+allIndices = (,) <$> coords <*> coords
 
 -- The player can input a number
 data Player = One | Two | Three | Four | Five | Six | Seven | Eight | Nine
@@ -64,7 +85,7 @@ newtype Board = Board {cell :: Index -> Cell}
 
 instance Show Board where
   show b =
-    unlines (map (unwords . map (show . cell b)) boardRows)
+    unlines (map (unwords . map (show . cell b)) (chunks 9 allIndices))
 
 --TODO: board left only for testing checking solution to be REMOVED
 testSolved :: Index -> Cell
@@ -172,49 +193,55 @@ eBoard :: Board
 eBoard = Board emptyBoard
 
 -- Check if a number is in a row
-checkRow :: Board -> Player -> Coordinate -> Bool
-checkRow b p cx = Mark p `elem` [cell b (cx, y) | y <- concat coBlocks]
+--checkRow :: Board -> Player -> Coordinate -> Bool
+--checkRow b p cx = Mark p `elem` [cell b (cx, y) | y <- concat coBlocks]
 
 -- Check if all 9 numbers are in a row
-checkRowForAll :: Board -> Coordinate -> Bool
-checkRowForAll b cx = and [checkRow b n cx | n <- numbers]
+--checkRowForAll :: Board -> Coordinate -> Bool
+--checkRowForAll b cx = and [checkRow b n cx | n <- numbers]
 
 -- Check if every row have all 9 numbers
-checkAllRows :: Board -> Bool
-checkAllRows b = and [checkRowForAll b cx | cx <- concat coBlocks]
+--checkAllRows :: Board -> Bool
+--checkAllRows b = and [checkRowForAll b cx | cx <- concat coBlocks]
 
 -- Check if a number is in a Column
-checkColumn :: Board -> Player -> Coordinate -> Bool
-checkColumn b p cy = Mark p `elem` [cell b (x, cy) | x <- concat coBlocks]
+--checkColumn :: Board -> Player -> Coordinate -> Bool
+--checkColumn b p cy = Mark p `elem` [cell b (x, cy) | x <- concat coBlocks]
 
 -- Check if all 9 numbers are in a column
-checkColumnForAll :: Board -> Coordinate -> Bool
-checkColumnForAll b cy = and [checkColumn b n cy | n <- numbers]
+--checkColumnForAll :: Board -> Coordinate -> Bool
+--checkColumnForAll b cy = and [checkColumn b n cy | n <- numbers]
 
 -- Check if every column have all 9 numbers
-checkAllColumns :: Board -> Bool
-checkAllColumns b = and [checkColumnForAll b cy | cy <- concat coBlocks]
+--checkAllColumns :: Board -> Bool
+--checkAllColumns b = and [checkColumnForAll b cy | cy <- concat coBlocks]
 
 -- Check if a number is in a block
-checkBlock :: Board -> Player -> [Coordinate] -> [Coordinate] -> Bool
--- checkBlock b p xb yb = Mark p `elem` [cell b (x, y) | x <- xb, y <- yb]
-checkBlock b p xb yb = Mark p `elem` [cell b (x, y) | x <- xb, y <- yb]
+--checkBlock :: Board -> Player -> [Coordinate] -> [Coordinate] -> Bool
+--checkBlock b p xb yb = Mark p `elem` [cell b (x, y) | x <- xb, y <- yb]
 
 -- Check if all 9 numbers are in a block
 --checkBlockForAll :: Board -> [Coordinate] -> [Coordinate] -> Bool
 -- checkBlockForAll b xb yb = and [checkBlock b n xb yb | n <- numbers]
-checkBlockForAll :: Board -> Bool
--- checkBlockForAll b = and [checkBlock tSolvedBoard n bx by | n <- numbers, bx <- coBlocks, by <- coBlocks]
 
-checkBlockForAll b = and (Mark n `elem` [(cell tSolvedBoard bx by) | n <- numbers, bx <- coBlocks, by <- coBlocks])
-
-numTimesFound :: Ord a => a -> [a] -> Int
-numTimesFound _ [] = 0
-numTimesFound x xs = (length . filter (== x)) xs
+--checkBlockForAll :: Board -> Bool
+--checkBlockForAll b = and [checkBlock tSolvedBoard n bx by | n <- numbers, bx <- coBlocks, by <- coBlocks]
 
 -- Check if every Block have all 9 numbers
 -- checkAllBlocks :: Board -> Bool
 -- checkAllBlocks b = and [checkBlockForAll b bx by | bx <- coBlocks, by <- coBlocks]
+
+--checkBlockForAll b = and (Mark n `elem` [(cell tSolvedBoard bx by) | n <- numbers, bx <- coBlocks, by <- coBlocks])
+
+checkSection :: Board -> Player -> [Index] -> Bool
+checkSection b n indices = Mark n `elem` [cell b i | i <- indices]
+
+checkBoard :: Board -> [[Index]] -> Bool
+checkBoard b indices = and [checkSection tSolvedBoard n i | n <- numbers, i <- indices]
+
+numTimesFound :: Ord a => a -> [a] -> Int
+numTimesFound _ [] = 0
+numTimesFound x xs = (length . filter (== x)) xs
 
 -- Check is a board is not full
 gameInProgress :: Int -> Board -> Bool
@@ -226,7 +253,7 @@ solve b
   | won = putStrLn "You Won! :)"
   | not won = putStrLn "Oh no! You lost all your cookies so you lose. :( Play again and you can have some more!"
   where
-    won = checkAllRows b && checkAllColumns b && checkBlockForAll b --checkAllBlocks b
+    won = checkBoard b rowIndices && checkBoard b columnIndices && checkBoard b blockIndices
 
 emptyAt :: Board -> Index -> Bool
 emptyAt b i = cell b i == Empty
@@ -313,9 +340,3 @@ play cookies b sb = do
       putStrLn ""
       if gameInProgress cookies' b' then play cookies' b' sb else solve b'
     else solve b
-
-chunks :: Int -> [a] -> [[a]]
-chunks _ [] = []
-chunks n xs =
-  let (ys, zs) = splitAt n xs
-   in ys : chunks n zs
