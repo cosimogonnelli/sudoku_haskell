@@ -16,6 +16,7 @@ main = do
   putStrLn "Control-C at any time to quit.\n"
   putStrLn "Starting board (size: 9x9)"
 
+  -- Currently, this only reads in one game, but additional game files could easily be added
   start <- readFile "start_board.txt"
   let list1 = words start
   solved <- readFile "solved_board.txt"
@@ -29,6 +30,7 @@ fillBoard :: [Index] -> [Cell] -> Board -> Board
 fillBoard [] [] b = b
 fillBoard (x : xs) (y : ys) b = fillBoard xs ys (write x y b)
 
+-- Reads file for words and returns list of cells
 parser :: [String] -> [Cell]
 parser s =
   let sNum = words [if n == ',' || n == '[' || n == ']' then ' ' else n | i <- s, n <- i]

@@ -21,15 +21,23 @@ chunks n xs =
 coords :: [Coordinate]
 coords = [C0, C1, C2, C3, C4, C5, C6, C7, C8]
 
+-- A block is a 3 x 3 section of numbers in the board. There are 9 blocks
+-- For example, block 1 is:
+-- (C0,C0) (C0, C1) (C0, C2)
+-- (C1,C0) (C1, C1) (C1, C2)
+-- (C2,C0) (C2, C1) (C2, C2)
 coBlocks :: [[Coordinate]]
 coBlocks = chunks 3 coords
 
+-- List of lists of indices in each block
 blockIndices :: [[Index]]
 blockIndices = [(,) <$> coBlocks !! x <*> coBlocks !! y | x <- [0 .. 2], y <- [0 .. 2]]
 
+-- List of lists of column indices
 columnIndices :: [[Index]]
 columnIndices = chunks 9 [(y, x) | x <- coords, y <- coords]
 
+-- List of lists of row indices
 rowIndices :: [[Index]]
 rowIndices = chunks 9 [(x, y) | x <- coords, y <- coords]
 
@@ -37,10 +45,11 @@ rowIndices = chunks 9 [(x, y) | x <- coords, y <- coords]
 numbers :: [Player]
 numbers = [One, Two, Three, Four, Five, Six, Seven, Eight, Nine]
 
+-- All indices in no particular order or partition
 allIndices :: [Index]
 allIndices = (,) <$> coords <*> coords
 
--- The player can input a number
+-- The player can input a valid sudoku number 1..9
 data Player = One | Two | Three | Four | Five | Six | Seven | Eight | Nine
   deriving (Eq, Show, Ord)
 
@@ -68,154 +77,62 @@ instance Show Board where
   show b =
     unlines (map (unwords . map (show . cell b)) (chunks 9 allIndices))
 
---TODO: board left only for testing checking solution to be REMOVED
-testSolved :: Index -> Cell
-testSolved (x, y) =
-  case (x, y) of
-    -- Block 1
-    (C0, C0) -> Mark Five
-    (C0, C1) -> Mark Three
-    (C0, C2) -> Mark Four
-    (C1, C0) -> Mark Six
-    (C1, C1) -> Mark Seven
-    (C1, C2) -> Mark Two
-    (C2, C0) -> Mark One
-    (C2, C1) -> Mark Nine
-    (C2, C2) -> Mark Eight
-    -- Block 2
-    (C0, C3) -> Mark Six
-    (C0, C4) -> Mark Seven
-    (C0, C5) -> Mark Eight
-    (C1, C3) -> Mark One
-    (C1, C4) -> Mark Nine
-    (C1, C5) -> Mark Five
-    (C2, C3) -> Mark Three
-    (C2, C4) -> Mark Four
-    (C2, C5) -> Mark Two
-    -- Block 3
-    (C0, C6) -> Mark Nine
-    (C0, C7) -> Mark One
-    (C0, C8) -> Mark Two
-    (C1, C6) -> Mark Three
-    (C1, C7) -> Mark Four
-    (C1, C8) -> Mark Eight
-    (C2, C6) -> Mark Five
-    (C2, C7) -> Mark Six
-    (C2, C8) -> Mark Seven
-    -- Block 4
-    (C3, C0) -> Mark Eight
-    (C3, C1) -> Mark Five
-    (C3, C2) -> Mark Nine
-    (C4, C0) -> Mark Four
-    (C4, C1) -> Mark Two
-    (C4, C2) -> Mark Six
-    (C5, C0) -> Mark Seven
-    (C5, C1) -> Mark One
-    (C5, C2) -> Mark Three
-    -- Block 5
-    (C3, C3) -> Mark Seven
-    (C3, C4) -> Mark Six
-    (C3, C5) -> Mark One
-    (C4, C3) -> Mark Eight
-    (C4, C4) -> Mark Five
-    (C4, C5) -> Mark Three
-    (C5, C3) -> Mark Nine
-    (C5, C4) -> Mark Two
-    (C5, C5) -> Mark Four
-    -- Block 6
-    (C3, C6) -> Mark Four
-    (C3, C7) -> Mark Two
-    (C3, C8) -> Mark Three
-    (C4, C6) -> Mark Seven
-    (C4, C7) -> Mark Nine
-    (C4, C8) -> Mark One
-    (C5, C6) -> Mark Eight
-    (C5, C7) -> Mark Five
-    (C5, C8) -> Mark Six
-    -- Block 7
-    (C6, C0) -> Mark Nine
-    (C6, C1) -> Mark Six
-    (C6, C2) -> Mark One
-    (C7, C0) -> Mark Two
-    (C7, C1) -> Mark Eight
-    (C7, C2) -> Mark Seven
-    (C8, C0) -> Mark Three
-    (C8, C1) -> Mark Four
-    (C8, C2) -> Mark Five
-    -- Block 8
-    (C6, C3) -> Mark Five
-    (C6, C4) -> Mark Three
-    (C6, C5) -> Mark Seven
-    (C7, C3) -> Mark Four
-    (C7, C4) -> Mark One
-    (C7, C5) -> Mark Nine
-    (C8, C3) -> Mark Two
-    (C8, C4) -> Mark Eight
-    (C8, C5) -> Mark Six
-    -- Block 9
-    (C6, C6) -> Mark Two
-    (C6, C7) -> Mark Eight
-    (C6, C8) -> Mark Four
-    (C7, C6) -> Mark Six
-    (C7, C7) -> Mark Three
-    (C7, C8) -> Mark Five
-    (C8, C6) -> Mark One
-    (C8, C7) -> Mark Seven
-    (C8, C8) -> Mark Nine
-
--- TODO: to be REMOVED
-tSolvedBoard :: Board
-tSolvedBoard = Board testSolved
-
+-- An empty board is empty at all indices
 emptyBoard :: Index -> Cell
 emptyBoard (x, y) = Empty
 
 eBoard :: Board
 eBoard = Board emptyBoard
 
+-- Checks each rectangular section (row, column, or block) for each number 1..9
 checkSection :: Board -> Player -> [Index] -> Bool
 checkSection b n indices = Mark n `elem` [cell b i | i <- indices]
 
+-- Checks all rows, columns, or blocks 
 checkBoard :: Board -> [[Index]] -> Bool
-checkBoard b indices = and [checkSection tSolvedBoard n i | n <- numbers, i <- indices]
+checkBoard b indices = and [checkSection b n i | n <- numbers, i <- indices]
 
--- Alternative way of checking replace checkSection and checkBoard
+-- Alternative way of checking replace checkSection and checkBoard using set-theory
 checkBoard2 :: Board -> [Index] -> Bool
 checkBoard2 b indices =
   let x = chunks 9 [cell b i | i <- indices]
       y = foldl1 intersect' x
    in (length x == length y) && and (zipWith (==) solution (sort y))
 
+-- Used in checkboard2
 intersect' :: [Cell] -> [Cell] -> [Cell]
 intersect' [] _ = []
 intersect' (x : xs) l
-  | elem x l = x : intersect' xs l
+  | x `elem` l = x : intersect' xs l
   | otherwise = intersect' xs l
 
+-- Used in checkboard2
 solution :: [Cell]
 solution = [readN n | n <- ["1", "2", "3", "4", "5", "6", "7", "8", "9"]]
 
--- Check if a board is not full
+-- Check if a board is not full and that the player still has cookies
 gameInProgress :: Int -> Board -> Bool
 gameInProgress cookies b = Empty `elem` [cell b (cx, cy) | cx <- concat coBlocks, cy <- concat coBlocks] && cookies > 0
 
--- Return true if every row, column and block have numbers from 1 to 9
+-- Return true if every row, column and block have numbers from 1 to 9 uniquely and valid sudoku solution
 solve :: Board -> IO ()
 solve b
   | won = putStrLn "You Won! :)"
   | not won = putStrLn "Oh no! You lost all your cookies so you lose. :( Play again and you can have some more!"
   where
-    -- won = checkBoard b rowIndices && checkBoard b columnIndices && checkBoard b blockIndices
-    won = checkBoard2 b (concat rowIndices) && checkBoard2 b (concat columnIndices) && checkBoard2 b (concat blockIndices)
+    won = checkBoard b rowIndices && checkBoard b columnIndices && checkBoard b blockIndices
+    --won = checkBoard2 b (concat rowIndices) && checkBoard2 b (concat columnIndices) && checkBoard2 b (concat blockIndices)
 
+-- Checks if index is empty
 emptyAt :: Board -> Index -> Bool
 emptyAt b i = cell b i == Empty
 
+-- Write a number to an index
 write :: Index -> Cell -> Board -> Board
 write i x b =
   Board $ \i' -> if i == i' && emptyAt b i then x else cell b i'
 
--- I/O Player Code
+-- Converts user input to coordinate type
 readCoord :: Char -> Maybe Coordinate
 readCoord '1' = Just C0
 readCoord '2' = Just C1
@@ -228,6 +145,7 @@ readCoord '8' = Just C7
 readCoord '9' = Just C8
 readCoord _ = Nothing
 
+-- Parses number from a .txt file and convert from string to cell type
 readN :: String -> Cell
 readN "1" = Mark One
 readN "2" = Mark Two
@@ -240,6 +158,7 @@ readN "8" = Mark Eight
 readN "9" = Mark Nine
 readN "0" = Empty
 
+-- Converts user input to cell type
 readNum :: Char -> Maybe Cell
 readNum '1' = Just (Mark One)
 readNum '2' = Just (Mark Two)
@@ -252,6 +171,7 @@ readNum '8' = Just (Mark Eight)
 readNum '9' = Just (Mark Nine)
 readNum _ = Nothing
 
+-- Handles player input which can either be a play or asking for a hint
 playerAct :: Int -> Board -> Board -> IO (Board, Int)
 playerAct cookies b sb = do
   input <- getLine
@@ -281,7 +201,7 @@ playerAct cookies b sb = do
         (_, Nothing) -> tryAgain "Invalid input on second coordinate for column. Must be a number 1..9"
     _ -> tryAgain "Invalid input. To play: row(1..9) column(1..9) number(1..9) || For help: row(1..9) column(1..9)"
 
--- parameter b is player's board, parameter sb is the solution board
+-- Parameter b is player's board, parameter sb is the solution board
 play :: Int -> Board -> Board -> IO ()
 play cookies b sb = do
   print b
