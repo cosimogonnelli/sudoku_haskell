@@ -1,7 +1,6 @@
 # sudoku_haskell
 
 This is an implementation of the Sudoku game in Haskell.  
-Final project in CS 557 Functional Languages at Portland State University.
 
 Authors: Cosimo Gonnelli & Jane Seigman
 
